@@ -1,14 +1,14 @@
 import { Model, Sequelize } from "sequelize";
 
 interface LlamadasAttributes {
-    id: number;
+    id_llamada: number;
     fecha_inicio: Date;
     fecha_fin: Date;
     calificacion: number;
-    idAgente: number;
+    idUsuario: number;
     idCliente: number;
     motivo: string;
-    sentimiento: string
+    urlTranscripcion: string
 }
 
 module.exports = (sequelize:any,DataTypes:any) => {
@@ -17,10 +17,10 @@ module.exports = (sequelize:any,DataTypes:any) => {
         public fecha_inicio!: Date;
         public fecha_fin!: Date;
         public calificacion!: number;
-        public idAgente: number;
-        public idCliente: number;
-        public motivo: string;
-        public sentimiento: string;
+        public idUsuario!: number;
+        public idCliente!: number;
+        public motivo!: string;
+        public urlTranscripcion!: string;
 
         static associate(models:any) {
             // define association here
@@ -45,7 +45,7 @@ module.exports = (sequelize:any,DataTypes:any) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        idAgente: {
+        idUsuario: {
             type: DataTypes.INTEGER,
             allowNull: false,
             foreingKey: true
@@ -59,7 +59,7 @@ module.exports = (sequelize:any,DataTypes:any) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        sentimiento: {
+        urlTranscripcion: {
             type: DataTypes.STRING,
             allowNull: false
         }
