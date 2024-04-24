@@ -1,6 +1,8 @@
-import Server from './providers/server';
-import { PORT, NODE_ENV } from './config';
+import Server from '../providers/server';
+import { PORT, NODE_ENV } from '../config';
 import express from 'express';
+import UsuarioController from '../controllers/UsuarioController';
+import TransaccionController from '../controllers/TransaccionController';
 
 const server = new Server({
     port: PORT,
@@ -10,7 +12,8 @@ const server = new Server({
         express.urlencoded({ extended: true })
     ],
     controllers: [
-        // AgenteController.instance
+        UsuarioController.instance,
+        TransaccionController.instance
     ]
 });
 
