@@ -47,13 +47,11 @@ module.exports = (sequelize:any,DataTypes:any) => {
         },
         idUsuario: {
             type: DataTypes.INTEGER,
-            allowNull: false,
-            foreingKey: true
+            allowNull: false
         },
         idCliente: {
             type: DataTypes.INTEGER,
-            allowNull: false,
-            foreingKey: true
+            allowNull: false
         },
         motivo: {
             type: DataTypes.STRING,
