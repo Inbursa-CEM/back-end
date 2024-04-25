@@ -59,7 +59,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         },
         idSupervisor: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: true
         },
         departamento: {
             type: DataTypes.STRING(50),
