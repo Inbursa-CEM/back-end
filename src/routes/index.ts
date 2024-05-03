@@ -3,6 +3,7 @@ import { PORT, NODE_ENV } from '../config';
 import express from 'express';
 import UsuarioController from '../controllers/UsuarioController';
 import TransaccionController from '../controllers/TransaccionController';
+import LlamadaController from '../controllers/LlamadaController';
 
 const server = new Server({
     port: PORT,
@@ -13,7 +14,8 @@ const server = new Server({
     ],
     controllers: [
         UsuarioController.instance,
-        TransaccionController.instance
+        TransaccionController.instance,
+        LlamadaController.instance
     ]
 });
 

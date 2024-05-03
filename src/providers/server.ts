@@ -13,8 +13,8 @@ class Server {
         this.app = express();
         this.port = appInit.port;
         this.env = appInit.env;
-        this.loadRoutes(appInit.controllers);
         this.loadMiddlewares(appInit.middlewares);
+        this.loadRoutes(appInit.controllers);
         this.connectDB();
     }
 
@@ -32,14 +32,13 @@ class Server {
         middlewares.forEach(middleware => {
             this.app.use(middleware);
         });
-    
+
     }
 
     public init() {
         this.app.listen(this.port, () => {
             console.log(`Server running on port ${this.port}`);
         });
-        // this.connectDB();
     }
 }
 
