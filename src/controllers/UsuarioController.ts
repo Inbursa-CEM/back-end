@@ -10,7 +10,7 @@ class UsuarioController extends AbstractController {
         if (this._instance) {
             return this._instance;
         }
-        this._instance = new UsuarioController("agente");
+        this._instance = new UsuarioController("usuario");
         return this._instance;
     }
 

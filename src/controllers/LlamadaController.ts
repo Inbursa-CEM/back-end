@@ -18,6 +18,7 @@ class LlamadaController extends AbstractController {
         this.router.get("/numLlamadas",this.getnumLlamadas.bind(this));
         this.router.get("/fechaLlamada",this.getfechaLlamada.bind(this));
         this.router.get("/motivoLlamada",this.getmotivoLlamada.bind(this));
+        this.router.get("/temaLlamada",this.gettemaLlamada.bind(this));
         this.router.get("/duracionLlamada",this.getduracionLlamada.bind(this));
         this.router.get("/nivelSatisfaccion",this.getnivelSatisfaccion.bind(this));
         this.router.get("/promedioDuracion",this.getpromedioDuracion.bind(this));
@@ -48,6 +49,16 @@ class LlamadaController extends AbstractController {
     }
 
     private async getmotivoLlamada(req: Request, res: Response) {
+        try {
+            console.log("UsuarioController works");
+            res.status(200).send("UsuarioController works");
+        } catch (error) {
+            console.log(error);
+            res.status(500).send("Error en UsuarioController");
+        }
+    }
+
+    private async gettemaLlamada(req: Request, res: Response) {
         try {
             console.log("UsuarioController works");
             res.status(200).send("UsuarioController works");

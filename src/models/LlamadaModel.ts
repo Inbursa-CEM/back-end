@@ -8,6 +8,7 @@ interface LlamadaAttributes {
     idUsuario: number;
     idCliente: number;
     sentimiento: string;
+    tema: string;
     motivo: string;
     urlTranscripcion: string;
 }
@@ -21,6 +22,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         public idUsuario!: number;
         public idCliente!: number;
         public sentimiento!: string;
+        public tema!: string;
         public motivo!: string;
         public urlTranscripcion!: string;
 
@@ -57,6 +59,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
         },
         sentimiento: {
             type: DataTypes.STRING(20),
+            allowNull: false
+        },
+        tema: {
+            type: DataTypes.STRING,
             allowNull: false
         },
         motivo: {

@@ -3,6 +3,7 @@ import { Model } from 'sequelize';
 interface TransaccionAttributes {
     id: number;
     fecha: Date;
+    nombre: string;
     detalle: string;
     estatus: string;
     monto: number;
@@ -13,6 +14,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
     class Transaccion extends Model<TransaccionAttributes> implements TransaccionAttributes {
         public id!: number;
         public fecha!: Date;
+        public nombre!: string;
         public detalle!: string;
         public estatus!: string;
         public monto!: number;
@@ -31,6 +33,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
         },
         fecha: {
             type: DataTypes.DATE,
+            allowNull: false
+        },
+        nombre: {
+            type: DataTypes.STRING,
             allowNull: false
         },
         detalle: {
