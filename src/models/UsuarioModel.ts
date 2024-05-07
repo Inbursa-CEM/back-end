@@ -1,7 +1,7 @@
 import { Model } from "sequelize";
 
 interface UsuarioAttributes {
-  id: number;
+  idUsuario: number;
   idConnect: number;
   nombre: string;
   telefono: number;
@@ -15,7 +15,7 @@ interface UsuarioAttributes {
 
 module.exports = (sequelize: any, DataTypes: any) => {
   class Usuario extends Model<UsuarioAttributes> implements UsuarioAttributes {
-    public id!: number;
+    public idUsuario!: number;
     public idConnect!: number;
     public nombre!: string;
     public telefono!: number;
@@ -27,12 +27,13 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public rol!: string;
 
     static associate(models: any) {
-      // define association here
+      Usuario.hasMany(models.Llamada);
+      Usuario.hasMany(models.Notifiacion);
     }
   }
   Usuario.init(
     {
-      id: {
+      idUsuario: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,

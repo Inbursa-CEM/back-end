@@ -3,6 +3,8 @@ import AbstractController from "./AbstractController";
 import db from "../models";
 
 class NotificacionController extends AbstractController {
+  // Singleton
+  // Atributos de clase
   private static _instance: NotificacionController;
   public static get instance(): NotificacionController {
     if (this._instance) {

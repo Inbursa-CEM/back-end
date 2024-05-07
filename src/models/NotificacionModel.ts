@@ -18,7 +18,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public fechaHora!: Date;
 
     static associate(models: any) {
-      // define association here
+      Notificacion.belongsTo(models.Usuario);
     }
   }
   Notificacion.init(
@@ -32,6 +32,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
       idUsuario: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: "Usuario",
+          key: "idUsuario",
+        },
       },
       contenido: {
         type: DataTypes.STRING,
