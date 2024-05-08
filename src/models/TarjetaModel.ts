@@ -2,6 +2,7 @@ import { Model } from 'sequelize';
 
 interface TarjetaAttributes {
     numCuenta: number;
+    tipo: string;
     saldo: number;
     idCliente: number;
 }
@@ -9,6 +10,7 @@ interface TarjetaAttributes {
 module.exports = (sequelize: any, DataTypes: any) => {
     class Tarjeta extends Model<TarjetaAttributes> implements TarjetaAttributes {
         public numCuenta!: number;
+        public tipo!: string;
         public saldo!: number;
         public idCliente!: number;
 
@@ -28,6 +30,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
         numCuenta: {
             type: DataTypes.INTEGER,
             primaryKey: true,
+            allowNull: false
+        },
+        tipo: {
+            type: DataTypes.STRING(50),
             allowNull: false
         },
         saldo: {
