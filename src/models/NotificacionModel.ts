@@ -1,4 +1,4 @@
-import { Model, Sequelize } from "sequelize";
+import { Model } from "sequelize";
 
 interface NotificacionAttributes {
   idNotificacion: number;
@@ -18,7 +18,11 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public fechaHora!: Date;
 
     static associate(models: any) {
-      Notificacion.belongsTo(models.Usuario);
+      Notificacion.belongsTo(models.Usuario, {
+        foreignKey: "idUsuario",
+        targetKey: "idUsuario",
+        as: "Usuario",
+      });
     }
   }
   Notificacion.init(

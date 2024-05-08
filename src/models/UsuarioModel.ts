@@ -6,7 +6,7 @@ interface UsuarioAttributes {
   nombre: string;
   telefono: number;
   correo: string;
-  contrasena: string;
+  password: string;
   idSupervisor: number;
   departamento: string;
   urlFoto: string;
@@ -20,15 +20,23 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public nombre!: string;
     public telefono!: number;
     public correo!: string;
-    public contrasena!: string;
+    public password!: string;
     public idSupervisor!: number;
     public departamento!: string;
     public urlFoto!: string;
     public rol!: string;
 
     static associate(models: any) {
-      Usuario.hasMany(models.Llamada);
-      Usuario.hasMany(models.Notifiacion);
+      Usuario.hasMany(models.Llamada, {
+        foreignKey: "idUsuario",
+        sourceKey: "idUsuario",
+        as: "Llamada",
+      });
+      Usuario.hasMany(models.Notificacion, {
+        foreignKey: "idUsuario",
+        sourceKey: "idUsuario",
+        as: "Notificacion",
+      });
     }
   }
   Usuario.init(
@@ -48,15 +56,15 @@ module.exports = (sequelize: any, DataTypes: any) => {
         allowNull: false,
       },
       telefono: {
-        type: DataTypes.INTEGER(10),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       correo: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING,
         allowNull: false,
       },
-      contrasena: {
-        type: DataTypes.STRING(30),
+      password: {
+        type: DataTypes.STRING,
         allowNull: false,
       },
       idSupervisor: {
@@ -64,7 +72,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         allowNull: true,
       },
       departamento: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       urlFoto: {
@@ -72,7 +80,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         allowNull: false,
       },
       rol: {
-        type: DataTypes.STRING(30),
+        type: DataTypes.STRING,
         allowNull: false,
       },
     },

@@ -25,8 +25,19 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public urlTranscripcion!: string;
 
     static associate(models: any) {
-      Llamada.belongsTo(models.Usuario);
-      Llamada.belongsTo(models.Cliente);
+      Llamada.belongsTo(
+        models.Usuario,
+         {
+          foreignKey: "idUsuario",
+          targetKey: "idUsuario",
+          as: "Usuario",
+        }
+      );
+      Llamada.belongsTo(models.Cliente, {
+        foreignKey: "idCliente",
+        targetKey: "idCliente",
+        as: "Cliente",
+      });
     }
   }
   Llamada.init(

@@ -15,7 +15,11 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public password!: string;
 
     static associate(models: any) {
-        Cliente.hasMany(models.Llamada);
+      Cliente.hasMany(models.Llamada, {
+        foreignKey: "idCliente",
+        sourceKey: "idCliente",
+        as: "Llamada",
+      });
     }
   }
   Cliente.init(
