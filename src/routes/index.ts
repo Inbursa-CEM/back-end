@@ -1,6 +1,11 @@
-import Server from './providers/server';
-import { PORT, NODE_ENV } from './config';
+import Server from '../providers/server';
+import { PORT, NODE_ENV } from '../config';
 import express from 'express';
+import UsuarioController from '../controllers/UsuarioController';
+import TransaccionController from '../controllers/TransaccionController';
+import LlamadaController from '../controllers/LlamadaController';
+import ClienteController from '../controllers/ClienteController';
+import TarjetaController from '../controllers/TarjetaController';
 
 const server = new Server({
     port: PORT,
@@ -10,7 +15,11 @@ const server = new Server({
         express.urlencoded({ extended: true })
     ],
     controllers: [
-        // AgenteController.instance
+        UsuarioController.instance,
+        LlamadaController.instance,
+        ClienteController.instance,
+        TarjetaController.instance,
+        TransaccionController.instance
     ]
 });
 
