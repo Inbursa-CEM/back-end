@@ -4,6 +4,8 @@ import express from 'express';
 import UsuarioController from '../controllers/UsuarioController';
 import TransaccionController from '../controllers/TransaccionController';
 import LlamadaController from '../controllers/LlamadaController';
+import ClienteController from '../controllers/ClienteController';
+import TarjetaController from '../controllers/TarjetaController';
 
 const server = new Server({
     port: PORT,
@@ -14,8 +16,10 @@ const server = new Server({
     ],
     controllers: [
         UsuarioController.instance,
-        TransaccionController.instance,
-        LlamadaController.instance
+        LlamadaController.instance,
+        ClienteController.instance,
+        TarjetaController.instance,
+        TransaccionController.instance
     ]
 });
 

@@ -25,61 +25,61 @@ class TransaccionController extends AbstractController {
 
     private async getfechaTransaccion(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("TransaccionController works");
+            res.status(200).send("TransaccionController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en TransaccionController");
         }
     }
 
     private async getdetalleTransaccion(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("TransaccionController works");
+            res.status(200).send("TransaccionController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en TransaccionController");
         }
     }
 
     private async getnombreTransaccion(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("TransaccionController works");
+            res.status(200).send("TransaccionController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en TransaccionController");
         }
     }
 
     private async getfolioTransaccion(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("TransaccionController works");
+            res.status(200).send("TransaccionController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en TransaccionController");
         }
     }
 
     private async getMonto(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("TransaccionController works");
+            res.status(200).send("TransaccionController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en TransaccionController");
         }
     }
 
     private async getEstatus(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("TransaccionController works");
+            res.status(200).send("TransaccionController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en TransaccionController");
         }
     }
 }

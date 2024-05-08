@@ -1,7 +1,7 @@
 import { Model } from 'sequelize';
 
 interface TransaccionAttributes {
-    id: number;
+    idTransaccion: number;
     fecha: Date;
     nombre: string;
     detalle: string;
@@ -12,7 +12,7 @@ interface TransaccionAttributes {
 
 module.exports = (sequelize: any, DataTypes: any) => {
     class Transaccion extends Model<TransaccionAttributes> implements TransaccionAttributes {
-        public id!: number;
+        public idTransaccion!: number;
         public fecha!: Date;
         public nombre!: string;
         public detalle!: string;
@@ -22,10 +22,14 @@ module.exports = (sequelize: any, DataTypes: any) => {
 
         static associate(models: any) {
             // define association here
+            Transaccion.belongsTo(models.Tarjeta,{
+                foreignKey: 'numCuenta',
+                as: 'tarjeta'
+            })
         }
     }
     Transaccion.init({
-        id: {
+        idTransaccion: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,

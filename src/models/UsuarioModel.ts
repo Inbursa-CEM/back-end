@@ -1,12 +1,12 @@
 import { Model } from 'sequelize';
 
 interface UsuarioAttributes {
-    id: number;
+    idUsuario: number;
     idConnect: number;
     nombre: string;
     telefono: number;
     correo: string;
-    contrasena: string;
+    password: string;
     idSupervisor: number;
     departamento: string;
     urlFoto: string;
@@ -15,12 +15,12 @@ interface UsuarioAttributes {
 
 module.exports = (sequelize: any, DataTypes: any) => {
     class Usuario extends Model<UsuarioAttributes> implements UsuarioAttributes {
-        public id!: number;
+        public idUsuario!: number;
         public idConnect!: number;
         public nombre!: string;
         public telefono!: number;
         public correo!: string;
-        public contrasena!: string;
+        public password!: string;
         public idSupervisor!: number;
         public departamento!: string;
         public urlFoto!: string;
@@ -28,10 +28,14 @@ module.exports = (sequelize: any, DataTypes: any) => {
 
         static associate(models: any) {
             // define association here
+            Usuario.hasMany(models.Llamada,{
+                foreignKey: 'idUsuario',
+                as: 'llamadas'
+            })
         }
     }
     Usuario.init({
-        id: {
+        idUsuario: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
@@ -53,7 +57,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
             type: DataTypes.STRING(50),
             allowNull: false
         },
-        contrasena: {
+        password: {
             type: DataTypes.STRING(30),
             allowNull: false
         },

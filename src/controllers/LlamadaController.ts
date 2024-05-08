@@ -30,111 +30,111 @@ class LlamadaController extends AbstractController {
 
     private async getnumLlamadas(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("LlamadaController works");
+            res.status(200).send("LlamadaController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en LlamadaController");
         }
     }
 
     private async getfechaLlamada(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("LlamadaController works");
+            res.status(200).send("LlamadaController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en LlamadaController");
         }
     }
 
     private async getmotivoLlamada(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("LlamadaController works");
+            res.status(200).send("LlamadaController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en LlamadaController");
         }
     }
 
     private async gettemaLlamada(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("LlamadaController works");
+            res.status(200).send("LlamadaController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en LlamadaController");
         }
     }
 
     private async getduracionLlamada(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("LlamadaController works");
+            res.status(200).send("LlamadaController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en LlamadaController");
         }
     }
 
     private async getnivelSatisfaccion(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("LlamadaController works");
+            res.status(200).send("LlamadaController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en LlamadaController");
         }
     }
 
     private async getpromedioDuracion(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("LlamadaController works");
+            res.status(200).send("LlamadaController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en LlamadaController");
         }
     }
 
     private async getpromedioServicio(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("LlamadaController works");
+            res.status(200).send("LlamadaController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en LlamadaController");
         }
     }
 
     private async getpromedioLlamadas(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("LlamadaController works");
+            res.status(200).send("LlamadaController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en LlamadaController");
         }
     }
 
     private async getsemaforo(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("LlamadaController works");
+            res.status(200).send("LlamadaController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en LlamadaController");
         }
     }
 
     private async getsentimiento(req: Request, res: Response) {
         try {
-            console.log("UsuarioController works");
-            res.status(200).send("UsuarioController works");
+            console.log("LlamadaController works");
+            res.status(200).send("LlamadaController works");
         } catch (error) {
             console.log(error);
-            res.status(500).send("Error en UsuarioController");
+            res.status(500).send("Error en LlamadaController");
         }
     }
 }

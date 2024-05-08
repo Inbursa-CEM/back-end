@@ -1,7 +1,7 @@
 import { Model } from 'sequelize';
 
 interface LlamadaAttributes {
-    id: number;
+    idLlamada: number;
     fechainicio: Date;
     fechafin: Date;
     calificacion: number;
@@ -15,7 +15,7 @@ interface LlamadaAttributes {
 
 module.exports = (sequelize: any, DataTypes: any) => {
     class Llamada extends Model<LlamadaAttributes> implements LlamadaAttributes {
-        public id!: number;
+        public idLlamada!: number;
         public fechainicio!: Date;
         public fechafin!: Date;
         public calificacion!: number;
@@ -28,10 +28,18 @@ module.exports = (sequelize: any, DataTypes: any) => {
 
         static associate(models: any) {
             // define association here
+            Llamada.belongsTo(models.Usuario,{
+                foreignKey: 'idUsuario',
+                as: 'usuario'
+            });
+            Llamada.belongsTo(models.Cliente,{
+                foreignKey: 'idCliente',
+                as: 'cliente'
+            })
         }
     }
     Llamada.init({
-        id: {
+        idLlamada: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
