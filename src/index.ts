@@ -5,6 +5,8 @@ import NotificacionController from "./controllers/NotificacionController";
 import UsuarioController from "./controllers/UsuarioController";
 import ClienteController from "./controllers/ClienteController";
 import LlamadaController from "./controllers/LlamadaController";
+import TarjetaController from "./controllers/TarjetaController";
+import TransaccionController from "./controllers/TransaccionController";
 
 const server = new Server({
   port: PORT,
@@ -15,6 +17,8 @@ const server = new Server({
     UsuarioController.instance,
     ClienteController.instance,
     LlamadaController.instance,
+    TarjetaController.instance,
+    TransaccionController.instance,
   ],
 });
 

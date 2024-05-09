@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 
 class UsuarioController extends AbstractController {
+  // Singleton
+  // Atributos de clase
   private static _instance: UsuarioController;
   public static get instance(): UsuarioController {
     if (this._instance) {

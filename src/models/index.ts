@@ -19,15 +19,15 @@ if (env === "development")
       dialect: "mysql",
       host: config.development.host,
       define: {
-        //Evitar que nos ponga createdAT y updatedAt
+        // Evitar que nos ponga createdAT y updatedAt
         timestamps: false,
-        //Evitar que agregue una s al final
+        // Evitar que agregue una s al final
         freezeTableName: true,
       },
     }
   );
 
-//Cargar los modelos de base de datos
+// Cargar los modelos de base de datos
 fs.readdirSync(__dirname)
   .filter((file) => {
     return (
@@ -44,7 +44,7 @@ fs.readdirSync(__dirname)
     db[model.name] = model;
   });
 
-//Generar las relaciones entre las tablas
+// Generar las relaciones entre las tablas
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
