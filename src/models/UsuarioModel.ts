@@ -37,6 +37,14 @@ module.exports = (sequelize: any, DataTypes: any) => {
         sourceKey: "idUsuario",
         as: "Notificacion",
       });
+      Usuario.hasMany(models.Usuario, {
+        foreignKey: "idUsuario",
+        sourceKey: "idSupervisor",
+      });
+      Usuario.belongsTo(models.Usuario, {
+        foreignKey: "idUsuario",
+        targetKey: "idSupervisor",
+      });
     }
   }
   Usuario.init(
@@ -70,6 +78,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
       idSupervisor: {
         type: DataTypes.INTEGER,
         allowNull: true,
+        references: {
+          model: "Usuario",
+          key: "idUsuario",
+        },
       },
       departamento: {
         type: DataTypes.STRING,
