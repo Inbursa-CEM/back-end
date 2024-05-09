@@ -42,7 +42,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         },
       },
       contenido: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
       },
       fechaHora: {

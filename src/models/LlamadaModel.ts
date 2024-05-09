@@ -59,7 +59,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         allowNull: true,
       },
       calificacion: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         allowNull: true,
       },
       idUsuario: {

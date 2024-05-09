@@ -3,7 +3,6 @@ import AbstractController from "../controllers/AbstractController";
 import db from "../models";
 
 class Server {
-  // Atributos de la clase
   private app!: express.Application;
   private port!: number;
   private env!: string;
