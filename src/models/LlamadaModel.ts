@@ -1,89 +1,104 @@
-import { Model } from 'sequelize';
+import { Model } from "sequelize";
 
 interface LlamadaAttributes {
-    idLlamada: number;
-    fechainicio: Date;
-    fechafin: Date;
-    calificacion: number;
-    idUsuario: number;
-    idCliente: number;
-    sentimiento: string;
-    tema: string;
-    motivo: string;
-    urlTranscripcion: string;
+  idLlamada: number;
+  fechaInicio: Date;
+  fechaFin: Date;
+  calificacion: number;
+  idUsuario: number;
+  idCliente: number;
+  sentimiento: string;
+  tema: string
+  motivo: string;
+  urlTranscripcion: string;
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
-    class Llamada extends Model<LlamadaAttributes> implements LlamadaAttributes {
-        public idLlamada!: number;
-        public fechainicio!: Date;
-        public fechafin!: Date;
-        public calificacion!: number;
-        public idUsuario!: number;
-        public idCliente!: number;
-        public sentimiento!: string;
-        public tema!: string;
-        public motivo!: string;
-        public urlTranscripcion!: string;
+  class Llamada extends Model<LlamadaAttributes> implements LlamadaAttributes {
+    public idLlamada!: number;
+    public fechaInicio!: Date;
+    public fechaFin!: Date;
+    public calificacion!: number;
+    public idUsuario!: number;
+    public idCliente!: number;
+    public sentimiento!: string;
+    public tema!: string;
+    public motivo!: string;
+    public urlTranscripcion!: string;
 
-        static associate(models: any) {
-            // define association here
-            Llamada.belongsTo(models.Usuario,{
-                foreignKey: 'idUsuario',
-                as: 'usuario'
-            });
-            Llamada.belongsTo(models.Cliente,{
-                foreignKey: 'idCliente',
-                as: 'cliente'
-            })
+    static associate(models: any) {
+      Llamada.belongsTo(
+        models.Usuario,
+         {
+          foreignKey: "idUsuario",
+          targetKey: "idUsuario",
+          as: "Usuario",
         }
+      );
+      Llamada.belongsTo(models.Cliente, {
+        foreignKey: "idCliente",
+        targetKey: "idCliente",
+        as: "Cliente",
+      });
     }
-    Llamada.init({
-        idLlamada: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-            allowNull: false
+  }
+  Llamada.init(
+    {
+      idLlamada: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false,
+      },
+      fechaInicio: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+      fechaFin: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      calificacion: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      idUsuario: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Usuario",
+          key: "idUsuario",
         },
-        fechainicio: {
-            type: DataTypes.DATE,
-            allowNull: false
+      },
+      idCliente: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Cliente",
+          key: "idCliente",
         },
-        fechafin: {
-            type: DataTypes.DATE,
-            allowNull: false
-        },
-        calificacion: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        idUsuario: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        idCliente: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        sentimiento: {
-            type: DataTypes.STRING(20),
-            allowNull: false
-        },
-        tema: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        motivo: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        urlTranscripcion: {
-            type: DataTypes.STRING,
-            allowNull: false
-        }
-    }, {
-        sequelize,
-        modelName: 'Llamada'
-    });
-    return Llamada;
+      },
+      sentimiento: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      tema: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      motivo: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      urlTranscripcion: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+    },
+    {
+      sequelize,
+      modelName: "Llamada",
+    }
+  );
+  return Llamada;
 };
