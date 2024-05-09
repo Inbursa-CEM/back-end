@@ -1,7 +1,7 @@
 import  { Model } from "sequelize";
 
 interface ClienteAttributes {
-    id: number;
+    idCliente: number;
     nombre: string;
     correo: string;
     password: string;
@@ -9,7 +9,7 @@ interface ClienteAttributes {
 
 module.exports = (sequelize:any, DataTypes:any) => {
     class Cliente extends Model<ClienteAttributes> implements ClienteAttributes {
-        public id!: number;
+        public idCliente!: number;
         public nombre!: string;
         public correo!: string;
         public password!: string;
@@ -18,7 +18,7 @@ module.exports = (sequelize:any, DataTypes:any) => {
         }
     }
     Cliente.init({
-        id: {
+        idCliente: {
             type: DataTypes.INTEGER,
             allowNull:false,
             primaryKey:true,
