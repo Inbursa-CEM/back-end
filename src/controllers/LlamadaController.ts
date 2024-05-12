@@ -30,13 +30,13 @@ class LlamadaController extends AbstractController {
 
   private async getnumLlamadas(req: Request, res: Response) {
     try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
-    }
+      const numeroLlamadas = await db["Llamada"].count();
+      res.status(200).json({LlamadasTotales: numeroLlamadas});
+  } catch (err) {
+      console.log(err);
+      res.status(500).send("Error en AreaOportunidad Controller");
   }
+}
 
   private async getfechaLlamada(req: Request, res: Response) {
     try {
