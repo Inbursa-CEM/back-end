@@ -1,13 +1,13 @@
 import { Model, Sequelize } from "sequelize";
 
 interface AreaOportunidadAttributes {
-    id: number;
+    idArea: number;
     nombre: string;
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
     class AreaOportunidad extends Model<AreaOportunidadAttributes> implements AreaOportunidadAttributes {
-        public id!: number;
+        public idArea!: number;
         public nombre!: string;
 
         static associate(models:any) {
@@ -18,7 +18,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
 
 
     AreaOportunidad.init({
-        id: {
+        idArea: {
             type: DataTypes.INTEGER,
             allowNull: false,
             autoIncrement: true,
@@ -30,7 +30,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         }
     }, {
         sequelize,
-        modelName: 'AreaOportunidad'
+        modelName: 'Area_Oportunidad'
     });
 
     return AreaOportunidad;

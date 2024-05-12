@@ -1,4 +1,4 @@
-import Server from "./providers/server";
+import Server from "./providers/Server";
 import { PORT, NODE_ENV } from "./config";
 import express from "express";
 import NotificacionController from "./controllers/NotificacionController";
@@ -7,6 +7,7 @@ import ClienteController from "./controllers/ClienteController";
 import LlamadaController from "./controllers/LlamadaController";
 import TarjetaController from "./controllers/TarjetaController";
 import TransaccionController from "./controllers/TransaccionController";
+import AreaOportunidadController from "./controllers/AreaOportunidadController";
 
 const server = new Server({
   port: PORT,
@@ -19,6 +20,7 @@ const server = new Server({
     LlamadaController.instance,
     TarjetaController.instance,
     TransaccionController.instance,
+    AreaOportunidadController.instance,
   ],
 });
 
