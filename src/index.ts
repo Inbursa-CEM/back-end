@@ -1,4 +1,4 @@
-import Server from "./providers/ServerBuenazo";
+import Server from "./providers/Server";
 import { PORT, NODE_ENV } from "./config";
 import express from "express";
 import NotificacionController from "./controllers/NotificacionController";
