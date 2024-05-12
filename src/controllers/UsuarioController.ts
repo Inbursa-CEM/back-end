@@ -29,6 +29,8 @@ class UsuarioController extends AbstractController {
     );
 
     this.router.get("/infoActualAgentes", this.getInfoActualAgentes.bind(this));
+
+    this.router.get("/agentesDeSupervisor", this.getAgentesBySupervisor.bind(this));
   }
 
   private async iniciarSesion(req: Request, res: Response) {
@@ -114,6 +116,32 @@ class UsuarioController extends AbstractController {
       res.status(500).send("Error en UsuarioController");
     }
   }
+
+  private async getAgentesBySupervisor(req: Request, res: Response){
+    try {
+        const idSupervisorTarget: number = req.body.idSupervisor;
+        console.log("Consultando agentes por supervisor --> "+idSupervisorTarget);
+
+        let agentes = await db["Usuario"].findAll({
+            attributes: [
+                'idUsuario',
+                'nombre'
+            ],
+            where: {
+                idSupervisor: idSupervisorTarget,
+                rol: "agente",
+            }
+        });
+
+        res.status(200).json(agentes);
+
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).send("Error en UsuarioController");
+    }
+  }
+
   private async getInfoActualAgentes(req: Request, res: Response) {
     try {
       console.log("Consultando información de angentes");
