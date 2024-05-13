@@ -1,7 +1,7 @@
 import { Model, Sequelize } from "sequelize";
 
 interface CursoAttributes {
-    id: number;
+    idCurso: number;
     nombre: string;
     url: string;
     descripcion: string;
@@ -10,19 +10,33 @@ interface CursoAttributes {
 module.exports = (sequelize: any, DataTypes: any) => {
     
     class Curso extends Model<CursoAttributes> implements CursoAttributes {
-        public id!: number;
+        public idCurso!: number;
         public nombre!: string;
         public url!: string;
         public descripcion!: string;
 
+        // Asociaciones
         static associate(models:any) {
+            // con Usuario
+            Curso.belongsToMany(models.Usuario,{
+                through: 'Usuario_Curso',
+                foreignKey: 'idCurso',
+                otherKey: 'idUsuario'
+            });
 
+            // con Area de oportunidad
+            Curso.belongsToMany(models.Area_Oportunidad,{
+                through: 'Curso_Area',
+                foreignKey: 'id_Curso',
+                otherKey: 'id_Area'
+
+            });
         }
 
     }
 
     Curso.init({
-        id: {
+        idCurso: {
             type: DataTypes.INTEGER,
             allowNull: false,
             autoIncrement: true,

@@ -6,12 +6,12 @@ interface UsuarioAreaOportunidadAttributes {
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
-    
+
     class UsuarioAreaOportunidad extends Model<UsuarioAreaOportunidadAttributes> implements UsuarioAreaOportunidadAttributes {
         public idUsuario!: number;
         public idArea!: number;
 
-        static associate(models:any) {
+        static associate(models: any) {
 
         }
 
@@ -21,14 +21,24 @@ module.exports = (sequelize: any, DataTypes: any) => {
         idUsuario: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey:true,
+            references:{
+                model:'Usuario',
+                key:'idUsuario'
+            }
         },
         idArea: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey:true,
+            references:{
+                model:'Area_Oportunidad',
+                key:'idArea'
+            }
         }
     }, {
         sequelize,
-        modelName: 'UsuarioAreaOportunidad'
+        modelName: 'Usuario_Area'
     });
 
     return UsuarioAreaOportunidad;

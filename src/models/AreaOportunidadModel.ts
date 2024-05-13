@@ -10,8 +10,19 @@ module.exports = (sequelize: any, DataTypes: any) => {
         public idArea!: number;
         public nombre!: string;
 
+        // Asociaciones
         static associate(models:any) {
+            // con Usuario
+            AreaOportunidad.belongsToMany(models.Usuario,{
+                through: 'Usuario_Area'
+            });
 
+            //  con Curso
+            AreaOportunidad.belongsToMany(models.Curso, {
+                through: 'Curso_Area',
+                foreignKey: 'id_Area',
+                otherKey: 'id_Curso'
+            });
         }
         
     }

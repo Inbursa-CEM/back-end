@@ -8,6 +8,7 @@ import LlamadaController from "./controllers/LlamadaController";
 import TarjetaController from "./controllers/TarjetaController";
 import TransaccionController from "./controllers/TransaccionController";
 import AreaOportunidadController from "./controllers/AreaOportunidadController";
+import CursoController from "./controllers/CursoController";
 
 const server = new Server({
   port: PORT,
@@ -21,6 +22,7 @@ const server = new Server({
     TarjetaController.instance,
     TransaccionController.instance,
     AreaOportunidadController.instance,
+    CursoController.instance,
   ],
 });
 

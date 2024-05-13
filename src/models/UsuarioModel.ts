@@ -45,6 +45,14 @@ module.exports = (sequelize: any, DataTypes: any) => {
         foreignKey: "idUsuario",
         targetKey: "idSupervisor",
       });
+      Usuario.belongsToMany(models.Area_Oportunidad, {
+        through: 'Usuario_Area'
+      });
+      Usuario.belongsToMany(models.Curso, {
+        through: 'Usuario_Curso',
+        foreignKey: 'idUsuario',
+        otherKey: 'idCurso'
+      });
     }
   }
   Usuario.init(

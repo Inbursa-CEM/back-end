@@ -1,15 +1,15 @@
 import { Model, Sequelize } from "sequelize";
 
 interface CursoAreaOportunidadAttributes {
-    idCurso: number;
-    idArea: number;
+    id_Curso: number;
+    id_Area: number;
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
     
     class CursoAreaOportunidad extends Model<CursoAreaOportunidadAttributes> implements CursoAreaOportunidadAttributes {
-        public idCurso!: number;
-        public idArea!: number;
+        public id_Curso!: number;
+        public id_Area!: number;
 
         static associate(models:any) {
 
@@ -18,17 +18,27 @@ module.exports = (sequelize: any, DataTypes: any) => {
     }
 
     CursoAreaOportunidad.init({
-        idCurso: {
+        id_Curso: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey:true,
+            references:{
+                model:'Curso',
+                key:'idCurso'
+            }
         },
-        idArea: {
+        id_Area: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey:true,
+            references:{
+                model:'Area_Oportunidad',
+                key:'idArea'
+            }
         }
     }, {
         sequelize,
-        modelName: 'CursoAreaOportunidad'
+        modelName: 'Curso_Area'
     });
 
     return CursoAreaOportunidad;

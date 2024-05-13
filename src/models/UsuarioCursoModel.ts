@@ -5,6 +5,7 @@ interface UsuarioCursoAttributes {
     idCurso: number;
     prioridad: number;
     estado: string;
+    fecha: Date;
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
@@ -14,6 +15,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         public idCurso!: number;
         public prioridad!: number;
         public estado!: string;
+        public fecha!: Date;
 
         static associate(models:any) {
 
@@ -25,22 +27,39 @@ module.exports = (sequelize: any, DataTypes: any) => {
         idUsuario: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey:true,
+            references:{
+                model:'Usuario',
+                key:'idUsuario'
+            }
         },
         idCurso: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey:true,
+            references:{
+                model:'Curso',
+                key:'idCurso'
+            }
         },
         prioridad: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            defaultValue: 0
         },
         estado: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            defaultValue: "---"
+        },
+        fecha: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW
         }
     }, {
         sequelize,
-        modelName: 'UsuarioCurso'
+        modelName: 'Usuario_Curso'
     });
 
     return UsuarioCurso;
