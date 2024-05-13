@@ -32,16 +32,20 @@ class LlamadaController extends AbstractController {
     try {
       const numeroLlamadas = await db["Llamada"].count();
       res.status(200).json({LlamadasTotales: numeroLlamadas});
+      console.log("Numero de llamadas totales");
   } catch (err) {
       console.log(err);
-      res.status(500).send("Error en AreaOportunidad Controller");
+      res.status(500).send("Error en LlamadaController");
   }
 }
 
   private async getfechaLlamada(req: Request, res: Response) {
     try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
+      const fechaLlamadas = await db["Llamada"].findAll({
+        attributes: ['idLlamada','fechaInicio', 'fechaFin']
+      });
+      res.status(200).send(fechaLlamadas);
+      console.log("Obteniendo fechas de llamadas");
     } catch (error) {
       console.log(error);
       res.status(500).send("Error en UsuarioController");
@@ -50,8 +54,11 @@ class LlamadaController extends AbstractController {
 
   private async getmotivoLlamada(req: Request, res: Response) {
     try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
+      const motivoLlamadas = await db["Llamada"].findAll({
+        attributes: ['idLlamada','motivo']
+      });
+      res.status(200).send(motivoLlamadas);
+      console.log("Obteniendo motivo de llamadas");
     } catch (error) {
       console.log(error);
       res.status(500).send("Error en UsuarioController");
@@ -60,8 +67,11 @@ class LlamadaController extends AbstractController {
 
   private async gettemaLlamada(req: Request, res: Response) {
     try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
+      const temaLlamadas = await db["Llamada"].findAll({
+        attributes: ['idLlamada','tema']
+      });
+      console.log("Obteniendo tema de llamadas");
+      res.status(200).send(temaLlamadas);
     } catch (error) {
       console.log(error);
       res.status(500).send("Error en UsuarioController");
@@ -70,11 +80,24 @@ class LlamadaController extends AbstractController {
 
   private async getduracionLlamada(req: Request, res: Response) {
     try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
+      console.log("Calculando duración de llamadas");
+      const llamadas = await db["Llamada"].findAll({
+        attributes: ['idLlamada', 'fechaInicio', 'fechaFin']
+      });
+      const duracionLlamadas = llamadas.map((llamada: any) => {
+        const fechaInicio = new Date(llamada.fechaInicio);
+        const fechaFin = new Date(llamada.fechaFin);
+        const duracionMs = fechaFin.getTime() - fechaInicio.getTime();
+        const duracionMinutos = duracionMs / 60000;
+        return {
+          idLlamada: llamada.idLlamada,
+          duracion: duracionMinutos
+        };
+      });
+      res.status(200).json({duracionLlamadas});
     } catch (error) {
       console.log(error);
-      res.status(500).send("Error en UsuarioController");
+      res.status(500).send("Error en calcularDuracionLlamada");
     }
   }
 
@@ -90,13 +113,26 @@ class LlamadaController extends AbstractController {
 
   private async getpromedioDuracion(req: Request, res: Response) {
     try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
+      const numeroLlamadas = await db["Llamada"].count();
+      const llamadas = await db["Llamada"].findAll({
+        attributes: ['fechaInicio', 'fechaFin']
+      });
+      let sumaDuracionesMs = 0;
+      for (const llamada of llamadas) {
+        const fechaInicio = new Date(llamada.fechaInicio);
+        const fechaFin = new Date(llamada.fechaFin);
+        const duracionMs = fechaFin.getTime() - fechaInicio.getTime();
+        sumaDuracionesMs += duracionMs;
+      }
+      const duracionPromedioMs = sumaDuracionesMs / numeroLlamadas;
+      const duracionPromedioMinutos = duracionPromedioMs / 60000;
+      res.status(200).json({ duracionPromedioMinutos });
     } catch (error) {
       console.log(error);
-      res.status(500).send("Error en UsuarioController");
+      res.status(500).send("Error en promedio de duracion de llamadas");
     }
   }
+     
 
   private async getpromedioServicio(req: Request, res: Response) {
     try {
