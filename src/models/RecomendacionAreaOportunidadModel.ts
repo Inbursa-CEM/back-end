@@ -21,14 +21,24 @@ module.exports = (sequelize: any, DataTypes: any) => {
         idRecomendacion: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey:true,
+            references:{
+                model:'Recomendacion',
+                key:'idRecomendacion'
+            }
         },
         idArea: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey:true,
+            references:{
+                model:'Area_Oportunidad',
+                key:'idArea'
+            }
         }
     }, {
         sequelize,
-        modelName: 'RecomendacionAreaOportunidad'
+        modelName: 'Recomendacion_Area'
     });
 
     return RecomendacionAreaOportunidad;

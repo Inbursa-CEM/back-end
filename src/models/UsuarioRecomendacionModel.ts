@@ -23,18 +23,29 @@ module.exports = (sequelize: any, DataTypes: any) => {
         idUsuario: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey:true,
+            references:{
+                model:'Usuario',
+                key:'idUsuario'
+            }
         },
         idRecomendacion: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey:true,
+            references:{
+                model:'Recomendacion',
+                key:'idRecomendacion'
+            }
         },
         activa: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
+            defaultValue: true,
         }
     }, {
         sequelize,
-        modelName: 'UsuarioRecomendacion'
+        modelName: 'Usuario_Recomendacion'
     });
 
     return UsuarioRecomendacion;

@@ -19,7 +19,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         static associate(models:any) {
             // con Usuario
             Curso.belongsToMany(models.Usuario,{
-                through: 'Usuario_Curso',
+                through: models.Usuario_Curso,
                 foreignKey: 'idCurso',
                 otherKey: 'idUsuario'
             });

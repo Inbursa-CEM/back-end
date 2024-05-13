@@ -50,14 +50,37 @@ class CursoController extends AbstractController {
             const idAgenteTarget: number = req.body.idAgente;
             console.log("Consultado Cursos del agente --> " + idAgenteTarget);
 
-            let agentes = await db["Usuario_Curso"].findAll({
-                attributes: { exclude: ['idUsuario'] },
-                where: {
-                    idUsuario: idAgenteTarget
+            let queryCompleta = await db["Usuario"].findAll({
+                where: { idUsuario: idAgenteTarget },
+                include: {
+                    model: db.Curso
                 }
             });
 
-            res.status(200).json(agentes);
+            const cursos = queryCompleta[0].Cursos.map((curso:any) => {
+                const idCurso = curso.idCurso;
+                const nombre = curso.nombre;
+                const url = curso.url;
+                const descripcion = curso.descripcion; 
+                const prioridad = curso.Usuario_Curso.prioridad;
+                const estado = curso.Usuario_Curso.estado;
+                const fecha = curso.Usuario_Curso.fecha;
+
+                return {
+                    idCurso,
+                    nombre,
+                    url,
+                    descripcion,
+                    prioridad,
+                    estado,
+                    fecha,
+                }
+            });
+
+
+
+
+            res.status(200).json(cursos);
         }
         catch (err) {
             console.log(err);

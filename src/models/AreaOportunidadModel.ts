@@ -23,6 +23,13 @@ module.exports = (sequelize: any, DataTypes: any) => {
                 foreignKey: 'id_Area',
                 otherKey: 'id_Curso'
             });
+
+            //  con Recomendacion
+            AreaOportunidad.belongsToMany(models.Recomendacion, {
+                through: 'Recomendacion_Area',
+                foreignKey: 'idArea',
+                otherKey: 'idRecomendacion'
+            });
         }
         
     }
