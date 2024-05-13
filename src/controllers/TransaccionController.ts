@@ -14,6 +14,7 @@ class TransaccionController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
+    this.router.get("/transaccion", this.getTransaccion.bind(this));
     this.router.get("/fechaTransaccion", this.getfechaTransaccion.bind(this));
     this.router.get("/nombreTransaccion", this.getnombreTransaccion.bind(this));
     this.router.get(
@@ -26,6 +27,16 @@ class TransaccionController extends AbstractController {
   }
 
   private async getfechaTransaccion(req: Request, res: Response) {
+    try {
+      console.log("TransaccionController works");
+      res.status(200).send("TransaccionController works");
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error en TransaccionController");
+    }
+  }
+
+  private async getTransaccion(req: Request, res: Response) {
     try {
       console.log("TransaccionController works");
       res.status(200).send("TransaccionController works");
