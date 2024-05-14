@@ -27,10 +27,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public rol!: string;
 
     static associate(models: any) {
-      Usuario.belongsToMany(models.Transaccion, {
-        through: "Llamada",
+      Usuario.hasMany(models.Llamada, {
         foreignKey: "idUsuario",
-        otherKey: "idTransaccion",
+        sourceKey: "idUsuario",
+        as: "Llamada",
       });
       Usuario.hasMany(models.Notificacion, {
         foreignKey: "idUsuario",

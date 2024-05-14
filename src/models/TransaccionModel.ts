@@ -27,11 +27,12 @@ module.exports = (sequelize: any, DataTypes: any) => {
       Transaccion.belongsTo(models.Tarjeta, {
         foreignKey: "numCuenta",
         targetKey: "numCuenta",
+        as: "Tarjeta",
       });
-      Transaccion.belongsToMany(models.Usuario, {
-        through: "Llamada",
+      Transaccion.hasMany(models.Llamada, {
         foreignKey: "idTransaccion",
-        otherKey: "idUsuario",
+        sourceKey: "idTransaccion",
+        as: "Llamada",
       });
     }
   }

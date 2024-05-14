@@ -15,6 +15,12 @@ module.exports = (sequelize: any, DataTypes: any) => {
       Cuenta.hasMany(models.Tarjeta, {
         foreignKey: "idCuenta",
         sourceKey: "idCuenta",
+        as: "Tarjeta",
+      });
+      Cuenta.belongsTo(models.Cliente, {
+        foreignKey: "idCliente",
+        targetKey: "idCliente",
+        as: "Cliente",
       });
     }
   }

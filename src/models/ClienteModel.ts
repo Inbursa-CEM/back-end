@@ -20,6 +20,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
       Cliente.hasMany(models.Cuenta, {
         foreignKey: "idCliente",
         sourceKey: "idCliente",
+        as: "Cuenta",
       });
     }
   }
