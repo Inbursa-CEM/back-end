@@ -1,7 +1,7 @@
 import { Model, Sequelize } from "sequelize";
 
 interface RecomendacionAttributes {
-    id: number;
+    idRecomendacion: number;
     nombre: string;
     descripcion: string;
 }
@@ -9,18 +9,33 @@ interface RecomendacionAttributes {
 module.exports = (sequelize: any, DataTypes: any) => {
     
     class Recomendacion extends Model<RecomendacionAttributes> implements RecomendacionAttributes {
-        public id!: number;
+        public idRecomendacion!: number;
         public nombre!: string;
         public descripcion!: string;
 
+        // Asociaciones
         static associate(models:any) {
+
+            // con Usuario
+            Recomendacion.belongsToMany(models.Usuario,{
+                through: 'Usuario_Recomendacion',
+                foreignKey: 'idRecomendacion',
+                otherKey: 'idUsuario'
+            });
+
+            // con Area
+            Recomendacion.belongsToMany(models.Area_Oportunidad, {
+                through: 'Recomendacion_Area',
+                foreignKey: 'idRecomendacion',
+                otherKey: 'idArea'
+            });
 
         }
 
     }
 
     Recomendacion.init({
-        id: {
+        idRecomendacion: {
             type: DataTypes.INTEGER,
             allowNull: false,
             autoIncrement: true,

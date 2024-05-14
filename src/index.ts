@@ -8,6 +8,9 @@ import ClienteController from "./controllers/ClienteController";
 import LlamadaController from "./controllers/LlamadaController";
 import TarjetaController from "./controllers/TarjetaController";
 import TransaccionController from "./controllers/TransaccionController";
+import AreaOportunidadController from "./controllers/AreaOportunidadController";
+import CursoController from "./controllers/CursoController";
+import RecomendacionController from "./controllers/RecomendacionController";
 
 // const corsOptions = {
 //   origin: "http://127.0.0.1:3000",
@@ -26,6 +29,9 @@ const server = new Server({
     LlamadaController.instance,
     TarjetaController.instance,
     TransaccionController.instance,
+    AreaOportunidadController.instance,
+    CursoController.instance,
+    RecomendacionController.instance,
   ],
 });
 
