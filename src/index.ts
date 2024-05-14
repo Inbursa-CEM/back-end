@@ -12,12 +12,6 @@ import AreaOportunidadController from "./controllers/AreaOportunidadController";
 import CursoController from "./controllers/CursoController";
 import RecomendacionController from "./controllers/RecomendacionController";
 
-// const corsOptions = {
-//   origin: "http://127.0.0.1:3000",
-//   // credentials: true, //access-control-allow-credentials:true
-//   // optionSuccessStatus: 200,
-// };
-
 const server = new Server({
   port: PORT,
   env: NODE_ENV,

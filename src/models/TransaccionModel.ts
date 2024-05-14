@@ -29,6 +29,11 @@ module.exports = (sequelize: any, DataTypes: any) => {
         targetKey: "numCuenta",
         as: "Tarjeta",
       });
+      Transaccion.hasMany(models.Llamada, {
+        foreignKey: "idTransaccion",
+        sourceKey: "idTransaccion",
+        as: "Llamada",
+      });
     }
   }
   Transaccion.init(

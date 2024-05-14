@@ -10,7 +10,7 @@ class NotificacionController extends AbstractController {
     if (this._instance) {
       return this._instance;
     }
-    this._instance = new NotificacionController("agente");
+    this._instance = new NotificacionController("notificacion");
     return this._instance;
   }
 

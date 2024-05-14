@@ -3,36 +3,76 @@ import AbstractController from "./AbstractController";
 import db from "../models";
 
 class UsuarioController extends AbstractController {
-    // Singleton
-    // Atributos de clase
-    private static _instance: UsuarioController;
-    public static get instance(): UsuarioController {
-        if (this._instance) {
-            return this._instance;
-        }
-        this._instance = new UsuarioController("usuario");
-        return this._instance;
+  // Singleton
+  // Atributos de clase
+  private static _instance: UsuarioController;
+  public static get instance(): UsuarioController {
+    if (this._instance) {
+      return this._instance;
     }
-
-  protected initializeRoutes(): void {
-    this.router.post("/iniciarSesion", this.iniciarSesion.bind(this));
-    this.router.post("/cerrarSesion", this.cerrarSesion.bind(this));
-    this.router.get("/infoActualAgentes", this.getInfoActualAgentes.bind(this));
+    this._instance = new UsuarioController("usuario");
+    return this._instance;
   }
 
-    private async iniciarSesion(req: Request, res: Response) {
-        try {
-            console.log("Se inicio sesión");
-        } catch (error) {
-            console.log(error);
-        }
+  protected initializeRoutes(): void {
+    // POST
+    this.router.post("/iniciarSesion", this.iniciarSesion.bind(this));
+    this.router.post("/cerrarSesion", this.cerrarSesion.bind(this));
+
+    // GET
+    this.router.get("/infoActualAgentes", this.getInfoActualAgentes.bind(this));
+    this.router.get(
+      "/agentesDeSupervisor",
+      this.getAgentesBySupervisor.bind(this)
+    );
+    this.router.get("/especifico", this.getSpecificAgent.bind(this));
+  }
+
+  private async iniciarSesion(req: Request, res: Response) {
+    try {
+      console.log("Se inicio sesión");
+    } catch (error) {
+      console.log(error);
     }
+  }
 
   private async cerrarSesion(req: Request, res: Response) {
     try {
       console.log("Se cerró sesión");
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  private async getAgentesBySupervisor(req: Request, res: Response) {
+    try {
+      const idSupervisorTarget: number = req.body.idSupervisor;
+      console.log(
+        "Consultando agentes por supervisor --> " + idSupervisorTarget
+      );
+
+      let agentes = await db["Usuario"].findAll({
+        attributes: ["idUsuario", "nombre"],
+        where: {
+          idSupervisor: idSupervisorTarget,
+          rol: "agente",
+        },
+      });
+
+      res.status(200).json(agentes);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send("Error en UsuarioController");
+    }
+  }
+
+  private async getSpecificAgent(req: Request, res: Response) {
+    try {
+      const agente = await db.Usuario.findByPk(req.body.idAgente);
+      res.status(200).json(agente);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send("Error en UsuarioController");
     }
   }
 
