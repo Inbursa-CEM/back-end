@@ -20,7 +20,6 @@ class LlamadaController extends AbstractController {
     this.router.get("/motivoLlamada", this.getmotivoLlamada.bind(this));
     this.router.get("/temaLlamada", this.gettemaLlamada.bind(this));
     this.router.get("/duracionLlamada", this.getduracionLlamada.bind(this));
-    this.router.get("/nivelSatisfaccion", this.getnivelSatisfaccion.bind(this));
     this.router.get("/promedioDuracion", this.getpromedioDuracion.bind(this));
     this.router.get("/promedioServicio", this.getpromedioServicio.bind(this));
     this.router.get("/promedioLlamadas", this.getpromedioLlamadas.bind(this));
@@ -101,16 +100,6 @@ class LlamadaController extends AbstractController {
     }
   }
 
-  private async getnivelSatisfaccion(req: Request, res: Response) {
-    try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
-    }
-  }
-
   private async getpromedioDuracion(req: Request, res: Response) {
     try {
       const numeroLlamadas = await db["Llamada"].count();
@@ -136,13 +125,21 @@ class LlamadaController extends AbstractController {
 
   private async getpromedioServicio(req: Request, res: Response) {
     try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
+      const llamadas = await db["Llamada"].findAll({
+        attributes: ['calificacion']
+      });
+        let sumaCalificaciones = 0;
+      for (const llamada of llamadas) {
+        sumaCalificaciones += llamada.calificacion;
+      }
+      const promedioCalificacionServicio = sumaCalificaciones / llamadas.length;
+      res.status(200).json({ promedioCalificacionServicio });
     } catch (error) {
       console.log(error);
       res.status(500).send("Error en UsuarioController");
     }
   }
+  
 
   private async getpromedioLlamadas(req: Request, res: Response) {
     try {
