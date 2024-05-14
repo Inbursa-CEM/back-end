@@ -81,15 +81,23 @@ class UsuarioController extends AbstractController {
       console.log("Consultando información de angentes");
       const supervisor = req.query.supervisor;
       const datos = await db["Usuario"].findAll({
-        attributes: ["idUsuario", "nombre"],
+        attributes: [
+          "idUsuario",
+          "nombre",
+          [
+            db.sequelize.literal(
+              'TIMESTAMPDIFF(SECOND, Llamada.fechaInicio, NOW())'
+            ),
+            "duracionLlamada",
+          ],
+        ],
         where: {
           rol: "agente",
           idSupervisor: supervisor,
-          "$Llamada.fechaFin$": null,
         },
         include: {
           model: db["Llamada"],
-          attributes: ["fechaInicio"],
+          attributes: ["fechaFin"],
           as: "Llamada",
           include: {
             model: db["Transaccion"],
@@ -118,26 +126,22 @@ class UsuarioController extends AbstractController {
       const resultado = datos.map((agente: any) => {
         const id = agente.idUsuario;
         const nombreAgente = agente.nombre;
-        let fechaInicioLlamada = null;
+        let duracion = null;
         let nombreCliente = null;
         let saldoCliente = null;
         if (agente.Llamada && agente.Llamada.length > 0) {
           const llamada = agente.Llamada[0];
-          fechaInicioLlamada = llamada.fechaInicio;
-          nombreCliente = llamada.Transaccion.Tarjeta.Cuenta.Cliente.nombre
-            ? llamada.Transaccion.Tarjeta.Cuenta.Cliente.nombre
-            : null;
-          saldoCliente =
-            llamada.Transaccion &&
-            llamada.Transaccion.Tarjeta &&
-            llamada.Transaccion.Tarjeta.length > 0
-              ? llamada.Transaccion.Tarjeta[0].saldo
-              : null;
+          if (llamada.fechaFin === null) {
+            duracion = agente.getDataValue("duracionLlamada");
+            nombreCliente =
+              llamada.Transaccion?.Tarjeta?.Cuenta?.Cliente?.nombre ?? null;
+            saldoCliente = llamada.Transaccion?.Tarjeta?.saldo ?? null;
+          }
         }
         return {
           id,
           nombreAgente,
-          fechaInicioLlamada,
+          duracion,
           nombreCliente,
           saldoCliente,
         };
