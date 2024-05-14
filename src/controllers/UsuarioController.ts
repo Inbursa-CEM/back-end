@@ -1,18 +1,19 @@
 import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
+import db from "../models";
 
 class UsuarioController extends AbstractController {
-  // Singleton
-  // Atributos de clase
-  private static _instance: UsuarioController;
-  public static get instance(): UsuarioController {
-    if (this._instance) {
-      return this._instance;
+    // Singleton
+    // Atributos de clase
+    private static _instance: UsuarioController;
+    public static get instance(): UsuarioController {
+        if (this._instance) {
+            return this._instance;
+        }
+        this._instance = new UsuarioController("usuario");
+        return this._instance;
     }
-    this._instance = new UsuarioController("usuario");
-    return this._instance;
-  }
 
   protected initializeRoutes(): void {
     this.router.post("/iniciarSesion", this.iniciarSesion.bind(this));
@@ -20,13 +21,13 @@ class UsuarioController extends AbstractController {
     this.router.get("/infoActualAgentes", this.getInfoActualAgentes.bind(this));
   }
 
-  private async iniciarSesion(req: Request, res: Response) {
-    try {
-      console.log("Se inicio sesión");
-    } catch (error) {
-      console.log(error);
+    private async iniciarSesion(req: Request, res: Response) {
+        try {
+            console.log("Se inicio sesión");
+        } catch (error) {
+            console.log(error);
+        }
     }
-  }
 
   private async cerrarSesion(req: Request, res: Response) {
     try {
