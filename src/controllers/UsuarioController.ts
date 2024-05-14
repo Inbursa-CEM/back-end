@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
-import db from "../models";
 
 class UsuarioController extends AbstractController {
     // Singleton
