@@ -91,7 +91,6 @@ class UsuarioController extends AbstractController {
         include: {
           model: db["Llamada"],
           attributes: ["fechaInicio"],
-          as: "Llamada",
           include: {
             model: db["Cliente"],
             attributes: ["nombre"],
