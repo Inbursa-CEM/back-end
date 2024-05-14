@@ -19,13 +19,17 @@ class RecomendacionController extends AbstractController {
         // POSTS
         this.router.post("/crear", this.postCrear.bind(this));
         this.router.post("/asignar", this.postAsignarReco.bind(this));
+        this.router.post("/desasignar", this.postDesasignarReco.bind(this));
 
         // GETS
         this.router.get("/agentesConRecomendacion", this.getAgentesConRecomendacion.bind(this));
         this.router.get("/cursosConRecomendacion", this.getCursosConRecomendacion.bind(this));
         this.router.get("/cambiarEstadoRecomendacion", this.getCambiarEstadoRecomendacion.bind(this));
 
-        this.router.get("/asignados", this.GetAllByAgente.bind(this));
+        this.router.get("/asignadas", this.GetAllByAgente.bind(this));
+        this.router.get("/porArea", this.GetAllByArea.bind(this));
+        this.router.get("/especifica", this.getSpecificRecomendacion.bind(this));
+
     }
 
     private async postCrear(req: Request, res: Response) {
@@ -51,6 +55,25 @@ class RecomendacionController extends AbstractController {
 
             console.log("Asignación exitosa");
             res.status(200).send("Asignación exitosa :)");
+
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("Error en Recomendacion Controller");
+        }
+    }
+
+    private async postDesasignarReco(req: Request, res: Response) {
+        try {
+            const desasignacion = await db.Usuario_Recomendacion.destroy({
+                where: {
+                    idRecomendacion: req.body.idRecomendacion,
+                    idUsuario: req.body.idAgente,
+                },
+            });
+
+
+            console.log("Desasignación exitosa");
+            res.status(200).send("Desasignación exitosa :)");
 
         } catch (err) {
             console.log(err);
@@ -114,7 +137,51 @@ class RecomendacionController extends AbstractController {
         }
         catch (err) {
             console.log(err);
-            res.status(500).send("Error en Curso Controller");
+            res.status(500).send("Error en Recomendacion Controller");
+        }
+    }
+
+    private async GetAllByArea(req: Request, res: Response) {
+        try {
+            const idAreaTarget: number = req.body.idArea;
+            console.log("Consultado Recomendaciones del área --> " + idAreaTarget);
+
+            let queryCompleta = await db["Area_Oportunidad"].findAll({
+                where: { idArea: idAreaTarget },
+                include: {
+                    model: db.Recomendacion
+                }
+            });
+
+            const recomendaciones = queryCompleta[0].Recomendacions.map((recomendacion:any) => {
+                const idRecomendacion = recomendacion.idRecomendacion;
+                const nombre = recomendacion.nombre;
+                const descripcion = recomendacion.descripcion; 
+
+                return {
+                    idRecomendacion,
+                    nombre,
+                    descripcion,
+                }
+            });
+
+            res.status(200).json(recomendaciones);
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).send("Error en Recomendacion Controller");
+        }
+    }
+
+    private async getSpecificRecomendacion(req: Request, res: Response) {
+        try {
+            const recomendacion = await db.Recomendacion.findByPk(req.body.idRecomendacion);
+            res.status(200).json(recomendacion);
+
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).send("Error en Recomendación controller");
         }
     }
 

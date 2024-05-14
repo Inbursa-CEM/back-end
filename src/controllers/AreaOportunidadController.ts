@@ -23,6 +23,7 @@ class AreaOportunidadController extends AbstractController {
         this.router.get("/all", this.getAll.bind(this));
         this.router.get("/cursosDeArea", this.getCursosDeArea.bind(this));
         this.router.get("/agentesConArea", this.getAgentesConArea.bind(this));
+        this.router.get("/especifica", this.getSpecificArea.bind(this));
     }
 
     private async postCrear(req: Request, res: Response) {
@@ -60,6 +61,18 @@ class AreaOportunidadController extends AbstractController {
 
         } catch (err) {
 
+        }
+    }
+
+    private async getSpecificArea(req: Request, res: Response) {
+        try {
+            const area = await db.Area_Oportunidad.findByPk(req.body.idArea);
+            res.status(200).json(area);
+
+        }
+        catch (err) {
+            console.log(err);
+            res.status(500).send("Error en Recomendación controller");
         }
     }
 
