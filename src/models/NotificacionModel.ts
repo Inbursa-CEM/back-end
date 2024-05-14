@@ -5,6 +5,7 @@ interface NotificacionAttributes {
   idUsuario: number;
   contenido: string;
   fechaHora: Date;
+  completada: boolean;
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
@@ -16,6 +17,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public idUsuario!: number;
     public contenido!: string;
     public fechaHora!: Date;
+    public completada!: boolean;
 
     static associate(models: any) {
       Notificacion.belongsTo(models.Usuario, {
@@ -48,6 +50,11 @@ module.exports = (sequelize: any, DataTypes: any) => {
       fechaHora: {
         type: DataTypes.DATE,
         allowNull: false,
+      },
+      completada: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       },
     },
     {

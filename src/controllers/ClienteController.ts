@@ -15,51 +15,18 @@ class ClienteController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
-    this.router.get("/id", this.getId.bind(this));
-    this.router.get("/nombre", this.getNombre.bind(this));
-    this.router.get("/correo", this.getCorreo.bind(this));
-    this.router.get("/password", this.getPassword.bind(this));
+    // this.router.get("/id", this.getId.bind(this));
   }
 
-  private async getId(req: Request, res: Response) {
-    try {
-      console.log("ClienteController works");
-      res.send("ClienteController works");
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Error al crear");
-    }
-  }
-
-  private async getNombre(req: Request, res: Response) {
-    try {
-      console.log("ClienteController works");
-      res.send("ClienteController works");
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Error al crear");
-    }
-  }
-
-  private async getCorreo(req: Request, res: Response) {
-    try {
-      console.log("ClienteController works");
-      res.send("ClienteController works");
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Error al crear");
-    }
-  }
-
-  private async getPassword(req: Request, res: Response) {
-    try {
-      console.log("ClienteController works");
-      res.send("ClienteController works");
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Error al crear");
-    }
-  }
+  // private async getId(req: Request, res: Response) {
+  //   try {
+  //     console.log("ClienteController works");
+  //     res.send("ClienteController works");
+  //   } catch (err) {
+  //     console.error(err);
+  //     res.status(500).send("Error al crear");
+  //   }
+  // }
 }
 
 export default ClienteController;
