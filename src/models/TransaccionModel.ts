@@ -27,7 +27,11 @@ module.exports = (sequelize: any, DataTypes: any) => {
       Transaccion.belongsTo(models.Tarjeta, {
         foreignKey: "numCuenta",
         targetKey: "numCuenta",
-        as: "Tarjeta",
+      });
+      Transaccion.belongsToMany(models.Usuario, {
+        through: "Llamada",
+        foreignKey: "idTransaccion",
+        otherKey: "idUsuario",
       });
     }
   }

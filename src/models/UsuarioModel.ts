@@ -27,10 +27,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public rol!: string;
 
     static associate(models: any) {
-      Usuario.hasMany(models.Llamada, {
+      Usuario.belongsToMany(models.Transaccion, {
+        through: "Llamada",
         foreignKey: "idUsuario",
-        sourceKey: "idUsuario",
-        as: "Llamada",
+        otherKey: "idTransaccion",
       });
       Usuario.hasMany(models.Notificacion, {
         foreignKey: "idUsuario",
@@ -45,18 +45,20 @@ module.exports = (sequelize: any, DataTypes: any) => {
         foreignKey: "idUsuario",
         targetKey: "idSupervisor",
       });
-      Usuario.belongsToMany(models.Area_Oportunidad, {
-        through: 'Usuario_Area'
+      Usuario.belongsToMany(models.AreaOportunidad, {
+        through: "UsuarioArea",
+        foreignKey: "idUsuario",
+        otherKey: "idArea",
       });
       Usuario.belongsToMany(models.Curso, {
-        through: models.Usuario_Curso,
-        foreignKey: 'idUsuario',
-        otherKey: 'idCurso'
+        through: models.UsuarioCurso,
+        foreignKey: "idUsuario",
+        otherKey: "idCurso",
       });
       Usuario.belongsToMany(models.Recomendacion, {
-        through: 'Usuario_Recomendacion',
-        foreignKey: 'idUsuario',
-        otherKey: 'idRecomendacion'
+        through: "UsuarioRecomendacion",
+        foreignKey: "idUsuario",
+        otherKey: "idRecomendacion",
       });
     }
   }

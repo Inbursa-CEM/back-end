@@ -5,6 +5,7 @@ interface ClienteAttributes {
   nombre: string;
   correo: string;
   password: string;
+  telefono: string;
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
@@ -13,17 +14,12 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public nombre!: string;
     public correo!: string;
     public password!: string;
+    public telefono!: string;
 
     static associate(models: any) {
-      Cliente.hasMany(models.Llamada, {
+      Cliente.hasMany(models.Cuenta, {
         foreignKey: "idCliente",
         sourceKey: "idCliente",
-        as: "Llamada",
-      });
-      Cliente.hasMany(models.Tarjeta, {
-        foreignKey: "idCliente",
-        sourceKey: "idCliente",
-        as: "Tarjeta",
       });
     }
   }
@@ -44,6 +40,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
         allowNull: false,
       },
       password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      telefono: {
         type: DataTypes.STRING,
         allowNull: false,
       },
