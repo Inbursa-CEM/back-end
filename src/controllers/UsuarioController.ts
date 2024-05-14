@@ -39,13 +39,12 @@ class UsuarioController extends AbstractController {
   private async getInfoActualAgentes(req: Request, res: Response) {
     try {
       console.log("Consultando información de angentes");
-      // console.log(req.body);
-      // const supervisor = req.body.supervisor;
+      const supervisor = req.query.supervisor;
       const datos = await db["Usuario"].findAll({
         attributes: ["idUsuario", "nombre"],
         where: {
           rol: "agente",
-          // idSupervisor: supervisor,
+          idSupervisor: supervisor,
           "$Llamada.fechaFin$": null,
         },
         include: {
@@ -53,15 +52,25 @@ class UsuarioController extends AbstractController {
           attributes: ["fechaInicio"],
           as: "Llamada",
           include: {
-            model: db["Cliente"],
-            attributes: ["nombre"],
-            as: "Cliente",
+            model: db["Transaccion"],
+            as: "Transaccion",
             required: true,
             include: {
               model: db["Tarjeta"],
-              attributes: ["saldo"],
               as: "Tarjeta",
+              attributes: ["saldo"],
               required: true,
+              include: {
+                model: db["Cuenta"],
+                as: "Cuenta",
+                required: true,
+                include: {
+                  model: db["Cliente"],
+                  as: "Cliente",
+                  required: true,
+                  attributes: ["nombre"],
+                },
+              },
             },
           },
         },
@@ -75,12 +84,14 @@ class UsuarioController extends AbstractController {
         if (agente.Llamada && agente.Llamada.length > 0) {
           const llamada = agente.Llamada[0];
           fechaInicioLlamada = llamada.fechaInicio;
-          nombreCliente = llamada.Cliente ? llamada.Cliente.nombre : null;
+          nombreCliente = llamada.Transaccion.Tarjeta.Cuenta.Cliente.nombre
+            ? llamada.Transaccion.Tarjeta.Cuenta.Cliente.nombre
+            : null;
           saldoCliente =
-            llamada.Cliente &&
-            llamada.Cliente.Tarjeta &&
-            llamada.Cliente.Tarjeta.length > 0
-              ? llamada.Cliente.Tarjeta[0].saldo
+            llamada.Transaccion &&
+            llamada.Transaccion.Tarjeta &&
+            llamada.Transaccion.Tarjeta.length > 0
+              ? llamada.Transaccion.Tarjeta[0].saldo
               : null;
         }
         return {
