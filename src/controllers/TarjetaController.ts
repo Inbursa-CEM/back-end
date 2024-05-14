@@ -14,40 +14,18 @@ class TarjetaController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
-    this.router.get("/numCuenta", this.getnumCuenta.bind(this));
-    this.router.get("/tipoTarjeta", this.gettipoTarjeta.bind(this));
-    this.router.get("/saldo", this.getsaldo.bind(this));
+    // this.router.get("/numCuenta", this.getnumCuenta.bind(this));
   }
 
-  private async getnumCuenta(req: Request, res: Response) {
-    try {
-      console.log("TarjetaController works");
-      res.status(200).send("TarjetaController works");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en TarjetaController");
-    }
-  }
-
-  private async gettipoTarjeta(req: Request, res: Response) {
-    try {
-      console.log("TarjetaController works");
-      res.status(200).send("TarjetaController works");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en TarjetaController");
-    }
-  }
-
-  private async getsaldo(req: Request, res: Response) {
-    try {
-      console.log("TarjetaController works");
-      res.status(200).send("TarjetaController works");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en TarjetaController");
-    }
-  }
+  // private async getnumCuenta(req: Request, res: Response) {
+  //   try {
+  //     console.log("TarjetaController works");
+  //     res.status(200).send("TarjetaController works");
+  //   } catch (error) {
+  //     console.log(error);
+  //     res.status(500).send("Error en TarjetaController");
+  //   }
+  // }
 }
 
 export default TarjetaController;
