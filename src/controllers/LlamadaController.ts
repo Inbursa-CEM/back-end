@@ -3,6 +3,7 @@ import AbstractController from "./AbstractController";
 import db from "../models";
 import { Sequelize, literal } from 'sequelize';
 
+
 class LlamadaController extends AbstractController {
   // Singleton
   // Atributos de clase
@@ -20,9 +21,160 @@ class LlamadaController extends AbstractController {
     this.router.post("/contestaSatisfaccion", this.postContestaSatisfaccion.bind(this));
 
     // GETS
-    this.router.get("promedioDuracion", this.getPromedioDuracion.bind(this));
-    this.router.get("/numLlamadas", this.getNumLlamadas.bind(this));
+    this.router.get("/promedioDuracionAgente", this.getPromedioDuracionAgente.bind(this));
+    this.router.get("/numLlamadasAgente", this.getNumLlamadasAgente.bind(this));
     this.router.get("/satisfaccion", this.getSatisfaccion.bind(this));
+    this.router.get("/numLlamadasPorAgente", this.getnumLlamadasPorAgente.bind(this));
+    this.router.get("/promedioServicioPorAgente", this.getpromedioServicioPorAgente.bind(this));
+    this.router.get("/sentimientoPorAgente", this.getSentimientoPorAgente.bind(this));
+    this.router.get("/reportesAtendidosPorAgente", this.getreportesAtendidosPorAgente.bind(this));
+    this.router.get("/numLlamadasTotales", this.getnumLlamadasTotales.bind(this));
+    this.router.get("/promedioDuracionPorAgente", this.getpromedioDuracionPorAgente.bind(this));
+    this.router.get("/promedioServicioGeneral", this.getpromedioServicioGeneral.bind(this));
+  }
+
+  private async getnumLlamadasPorAgente(req: Request, res: Response) {
+    try {
+      const numeroLlamadasPorAgente = await db["Llamada"].findAll({
+        attributes: ['idUsuario', [Sequelize.fn('COUNT', 'idUsuario'), 'numLlamadas']],
+        group: ['idUsuario']
+      });
+  
+      res.status(200).json(numeroLlamadasPorAgente);
+      console.log("Número de llamadas totales por agente");
+    } catch (err) {
+      console.log(err);
+      res.status(500).send("Error en LlamadaController");
+    }
+  }
+   
+
+  private async getpromedioServicioGeneral(req: Request, res: Response) {
+    try {
+      const resultado = await db["Llamada"].findOne({
+        attributes: [
+          [
+            Sequelize.literal('AVG(CASE WHEN problemaResuelto = 1 THEN 1 ELSE 0 END)'), 
+            'promedioServicioGeneral'
+          ]
+        ]
+      });
+      if (resultado && resultado.getDataValue('promedioServicioGeneral') !== null) {
+        const promedioServicioGeneral = resultado.getDataValue('promedioServicioGeneral') * 100;
+        resultado.setDataValue('promedioServicioGeneral', promedioServicioGeneral);
+      }
+      res.status(200).json(resultado);
+      console.log("Promedio del servicio en general");
+    } catch (err) {
+      console.log(err);
+      res.status(500).send("Error en LlamadaController");
+    }
+  }
+  
+
+private async getreportesAtendidosPorAgente(req: Request, res: Response) {
+  try {
+    const resultado = await db["Llamada"].findAll({
+      attributes: ['idUsuario',
+        [Sequelize.literal('SUM(CASE WHEN problemaResuelto = 1 THEN 1 ELSE 0 END)'), 'problemasResueltos'],
+        [Sequelize.literal('SUM(CASE WHEN problemaResuelto = 0 THEN 1 ELSE 0 END)'), 'problemasNoResueltos']
+      ],
+      group: ['idUsuario']
+    });
+
+    res.status(200).json(resultado);
+    console.log("Número de problemas resueltos y no resueltos por agente");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error en LlamadaController");
+  }
+}
+
+
+private async getSentimientoPorAgente(req: Request, res: Response) {
+  try {
+    const resultado = await db["Llamada"].findAll({
+      attributes: ['idUsuario',
+        [Sequelize.literal('SUM(CASE WHEN sentimiento = "positivo" THEN 1 ELSE 0 END)'), 'positivo'],
+        [Sequelize.literal('SUM(CASE WHEN sentimiento = "negativo" THEN 1 ELSE 0 END)'), 'negativo'],
+        [Sequelize.literal('SUM(CASE WHEN sentimiento = "neutral" THEN 1 ELSE 0 END)'), 'neutral']
+      ],
+      group: ['idUsuario']
+    });
+
+    res.status(200).json(resultado);
+    console.log("Número de veces que aparece cada sentimiento por agente");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error en LlamadaController");
+  }
+}
+
+
+private async getpromedioServicioPorAgente(req: Request, res: Response) {
+  try {
+    const resultado = await db["Llamada"].findAll({
+      attributes: ['idUsuario',
+        [
+          Sequelize.literal('AVG(CASE WHEN problemaResuelto = 1 THEN 1 ELSE 0 END)'), 
+          'promedioProblemasResueltos'
+        ]
+      ],
+      group: ['idUsuario']
+    });
+
+    res.status(200).json(resultado);
+    console.log("Promedio de problemas resueltos por agente");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error en LlamadaController");
+  }
+}
+
+  private async getnumLlamadasTotales(req: Request, res: Response) {
+    try {
+      const numeroLlamadas = await db["Llamada"].count();
+      res.status(200).json({LlamadasTotales: numeroLlamadas});
+      console.log("Numero de llamadas totales");
+  } catch (err) {
+      console.log(err);
+      res.status(500).send("Error en LlamadaController");
+  }
+}
+
+  private async getpromedioDuracionPorAgente(req: Request, res: Response) {
+    try {
+      console.log("Calculando duración promedio de llamadas por agente");
+        const llamadas = await db["Llamada"].findAll({
+        attributes: ['idUsuario', 'fechaInicio', 'fechaFin']
+        // include: {
+        //   model: db["Usuario"],
+        //   attributes: ['nombre']
+        // }
+      });
+      const duracionPorAgente: Record<string, { totalDuracion: number, totalLlamadas: number }> = {};
+        for (const llamada of llamadas) {
+        const idAgente = llamada.idUsuario.toString();
+        const fechaInicio = new Date(llamada.fechaInicio);
+        const fechaFin = new Date(llamada.fechaFin);
+        const duracionMs = fechaFin.getTime() - fechaInicio.getTime();
+        // let nombre = llamada.idUsuario.toString();
+  
+        if (!duracionPorAgente[idAgente]) {
+          duracionPorAgente[idAgente] = { totalDuracion: 0, totalLlamadas: 0 };
+        }
+        duracionPorAgente[idAgente].totalDuracion += duracionMs;
+        duracionPorAgente[idAgente].totalLlamadas++;
+      }
+        const promedioDuracionPorAgente = Object.entries(duracionPorAgente).map(([idAgente, { totalDuracion, totalLlamadas }]) => ({
+        idAgente,
+        tiempoPromedio: (totalDuracion / totalLlamadas) / 60000
+      }));
+        res.status(200).json(promedioDuracionPorAgente);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error en calcular duración promedio de llamadas por agente");
+    }
   }
    
   private async postContestaSatisfaccion(req: Request, res: Response) {
@@ -48,7 +200,7 @@ class LlamadaController extends AbstractController {
     }
   }
 
-  private async getPromedioDuracion(req: Request, res: Response) {
+  private async getPromedioDuracionAgente(req: Request, res: Response) {
   try {
     const idAgenteTarget = req.body.idAgente;
     const currentDate = literal('CURRENT_DATE');
@@ -86,7 +238,7 @@ class LlamadaController extends AbstractController {
   }
 }
 
-  private async getNumLlamadas(req: Request, res: Response) {
+  private async getNumLlamadasAgente(req: Request, res: Response) {
     try {
       const idAgenteTarget = req.body.idAgente;
       const currentDate = literal('CURRENT_DATE');
