@@ -18,15 +18,12 @@ class LlamadaController extends AbstractController {
 
   protected initializeRoutes(): void {
     this.router.get("/numLlamadasPorAgente", this.getnumLlamadasPorAgente.bind(this));
-    
     this.router.get("/promedioServicioPorAgente", this.getpromedioServicioPorAgente.bind(this));
     this.router.get("/sentimientoPorAgente", this.getSentimientoPorAgente.bind(this));
     this.router.get("/reportesAtendidosPorAgente", this.getreportesAtendidosPorAgente.bind(this));
     this.router.get("/numLlamadas", this.getnumLlamadas.bind(this));
     this.router.get("/promedioDuracion", this.getpromedioDuracion.bind(this));
-
-
-    this.router.get("/duracionLlamadaPorAgente", this.getduracionLlamadaPorAgente.bind(this));
+    this.router.get("/promedioServicioGeneral", this.getpromedioServicioGeneral.bind(this));
   }
 
   private async getnumLlamadasPorAgente(req: Request, res: Response) {
@@ -45,17 +42,30 @@ class LlamadaController extends AbstractController {
   }
    
 
-private async getduracionLlamadaPorAgente(req: Request, res: Response) {
-  try {
-    res.status(200).json("H");
-    console.log("Numero de llamadas totales");
-} catch (err) {
-    console.log(err);
-    res.status(500).send("Error en LlamadaController");
-}
-}
+  private async getpromedioServicioGeneral(req: Request, res: Response) {
+    try {
+      const resultado = await db["Llamada"].findOne({
+        attributes: [
+          [
+            Sequelize.literal('AVG(CASE WHEN problemaResuelto = 1 THEN 1 ELSE 0 END)'), 
+            'promedioServicioGeneral'
+          ]
+        ]
+      });
+      if (resultado && resultado.getDataValue('promedioServicioGeneral') !== null) {
+        const promedioServicioGeneral = resultado.getDataValue('promedioServicioGeneral') * 100;
+        resultado.setDataValue('promedioServicioGeneral', promedioServicioGeneral);
+      }
+      res.status(200).json(resultado);
+      console.log("Promedio del servicio en general");
+    } catch (err) {
+      console.log(err);
+      res.status(500).send("Error en LlamadaController");
+    }
+  }
+  
 
-private async getpromedioServicioPorAgente(req: Request, res: Response) {
+private async getreportesAtendidosPorAgente(req: Request, res: Response) {
   try {
     const resultado = await db["Llamada"].findAll({
       attributes: ['idUsuario',
@@ -94,7 +104,7 @@ private async getSentimientoPorAgente(req: Request, res: Response) {
 }
 
 
-private async getreportesAtendidosPorAgente(req: Request, res: Response) {
+private async getpromedioServicioPorAgente(req: Request, res: Response) {
   try {
     const resultado = await db["Llamada"].findAll({
       attributes: ['idUsuario',
