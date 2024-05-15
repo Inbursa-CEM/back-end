@@ -32,15 +32,13 @@ class UsuarioController extends AbstractController {
     try {
       const correo = req.body.correo;
       const password = req.body.password;
-      const usuario = await db.Usuario.findAll(
-        {
-          attributes: ["idUsuario", "nombre", "rol"],
-          where: {
-            correo: correo,
-            password: password,
-          },
-        }
-      );
+      const usuario = await db.Usuario.findAll({
+        attributes: ["idUsuario", "nombre", "rol"],
+        where: {
+          correo: correo,
+          password: password,
+        },
+      });
       if (usuario.length === 0) {
         res.status(404).send("Usuario no encontrado");
         return;
@@ -103,7 +101,7 @@ class UsuarioController extends AbstractController {
           "nombre",
           [
             db.sequelize.literal(
-              'TIMESTAMPDIFF(SECOND, Llamada.fechaInicio, NOW())'
+              "TIMESTAMPDIFF(SECOND, Llamada.fechaInicio, NOW())"
             ),
             "duracionLlamada",
           ],
