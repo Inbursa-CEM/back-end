@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
+import { Sequelize } from 'sequelize';
+
 
 class LlamadaController extends AbstractController {
   // Singleton
@@ -21,22 +23,26 @@ class LlamadaController extends AbstractController {
     this.router.get("/promedioSentimientoPorAgente", this.getpromedioSentimientoPorAgente.bind(this));
     this.router.get("/reportesAtendidosPorAgente", this.getreportesAtendidosPorAgente.bind(this));
     this.router.get("/numLlamadas", this.getnumLlamadas.bind(this));
-
-
-
     this.router.get("/promedioDuracion", this.getpromedioDuracion.bind(this));
   }
 
   private async getnumLlamadasPorAgente(req: Request, res: Response) {
     try {
-      const numeroLlamadas = await db["Llamada"].count();
-      res.status(200).json({LlamadasTotales: numeroLlamadas});
-      console.log("Numero de llamadas totales");
-  } catch (err) {
+      const numeroLlamadasPorAgente = await db["Llamada"].findAll({
+        attributes: ['idUsuario', [Sequelize.fn('COUNT', 'idUsuario'), 'numLlamadas']],
+        group: ['idUsuario']
+      });
+  
+      res.status(200).json(numeroLlamadasPorAgente);
+      console.log("Número de llamadas totales por agente");
+    } catch (err) {
       console.log(err);
       res.status(500).send("Error en LlamadaController");
+    }
   }
-}
+  
+  
+  
 
 private async getduracionLlamadaPorAgente(req: Request, res: Response) {
   try {
@@ -93,11 +99,11 @@ private async getreportesAtendidosPorAgente(req: Request, res: Response) {
     try {
       console.log("Calculando duración promedio de llamadas por agente");
         const llamadas = await db["Llamada"].findAll({
-        attributes: ['idUsuario', 'fechaInicio', 'fechaFin'],
-        include: {
-          model: db["Usuario"],
-          attributes: ['nombre']
-        }
+        attributes: ['idUsuario', 'fechaInicio', 'fechaFin']
+        // include: {
+        //   model: db["Usuario"],
+        //   attributes: ['nombre']
+        // }
       });
       const duracionPorAgente: Record<string, { totalDuracion: number, totalLlamadas: number }> = {};
         for (const llamada of llamadas) {
