@@ -16,8 +16,8 @@ class Server {
     this.app = express();
     this.port = appInit.port;
     this.env = appInit.env;
-    this.loadRoutes(appInit.controllers);
     this.loadMiddlewares(appInit.middlewares);
+    this.loadRoutes(appInit.controllers);
     this.connectDB();
   }
 

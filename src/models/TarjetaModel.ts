@@ -4,7 +4,7 @@ interface TarjetaAttributes {
   numCuenta: number;
   tipo: string;
   saldo: number;
-  idCliente: number;
+  idCuenta: number;
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
@@ -12,13 +12,13 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public numCuenta!: number;
     public tipo!: string;
     public saldo!: number;
-    public idCliente!: number;
+    public idCuenta!: number;
 
     static associate(models: any) {
-      Tarjeta.belongsTo(models.Cliente, {
-        foreignKey: "idCliente",
-        targetKey: "idCliente",
-        as: "Cliente",
+      Tarjeta.belongsTo(models.Cuenta, {
+        foreignKey: "idCuenta",
+        targetKey: "idCuenta",
+        as: "Cuenta",
       });
       Tarjeta.hasMany(models.Transaccion, {
         foreignKey: "numCuenta",
@@ -42,12 +42,12 @@ module.exports = (sequelize: any, DataTypes: any) => {
         type: DataTypes.FLOAT,
         allowNull: false,
       },
-      idCliente: {
+      idCuenta: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "Cliente",
-          key: "idCliente",
+          model: "Cuenta",
+          key: "idCuenta",
         },
       },
     },
