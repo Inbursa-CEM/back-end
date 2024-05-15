@@ -11,8 +11,7 @@ interface NotificacionAttributes {
 module.exports = (sequelize: any, DataTypes: any) => {
   class Notificacion
     extends Model<NotificacionAttributes>
-    implements NotificacionAttributes
-  {
+    implements NotificacionAttributes {
     public idNotificacion!: number;
     public idUsuario!: number;
     public contenido!: string;
