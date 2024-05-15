@@ -46,39 +46,23 @@ class UsuarioController extends AbstractController {
 
   private async agendarOneOnOne(req: Request, res: Response) {
     try {
-      console.log("Se agendo sesión 1:1");
-    } catch (error) {
-      console.log(error);
-    }
-  }
+      const idSupervisorTarget: number = req.body.idSupervisor;
+      console.log(
+        "Consultando agentes por supervisor --> " + idSupervisorTarget
+      );
 
-  private async getnombreSupervisor(req: Request, res: Response) {
-    try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
-    }
-  }
+      let agentes = await db["Usuario"].findAll({
+        attributes: ["idUsuario", "nombre"],
+        where: {
+          idSupervisor: idSupervisorTarget,
+          rol: "agente",
+        },
+      });
 
-  private async getestadoUsuario(req: Request, res: Response) {
-    try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
-    }
-  }
-
-  private async gettelefonoUsuario(req: Request, res: Response) {
-    try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
+      res.status(200).json(agentes);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send("Error en Usuario Controller");
     }
   }
 
