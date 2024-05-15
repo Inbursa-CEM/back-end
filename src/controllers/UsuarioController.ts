@@ -46,7 +46,7 @@ class UsuarioController extends AbstractController {
 
   private async getAgentesBySupervisor(req: Request, res: Response) {
     try {
-      const idSupervisorTarget: number = req.body.idSupervisor;
+      const idSupervisorTarget = req.query.idSupervisor;
       console.log(
         "Consultando agentes por supervisor --> " + idSupervisorTarget
       );
