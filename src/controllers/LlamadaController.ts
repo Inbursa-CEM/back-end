@@ -15,17 +15,68 @@ class LlamadaController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
+    this.router.get("/numLlamadasPorAgente", this.getnumLlamadasPorAgente.bind(this));
+    this.router.get("/duracionLlamadaPorAgente", this.getduracionLlamadaPorAgente.bind(this));
+    this.router.get("/promedioServicioPorAgente", this.getpromedioServicioPorAgente.bind(this));
+    this.router.get("/promedioSentimientoPorAgente", this.getpromedioSentimientoPorAgente.bind(this));
+    this.router.get("/reportesAtendidosPorAgente", this.getreportesAtendidosPorAgente.bind(this));
     this.router.get("/numLlamadas", this.getnumLlamadas.bind(this));
-    this.router.get("/fechaLlamada", this.getfechaLlamada.bind(this));
-    this.router.get("/motivoLlamada", this.getmotivoLlamada.bind(this));
-    this.router.get("/temaLlamada", this.gettemaLlamada.bind(this));
-    this.router.get("/duracionLlamada", this.getduracionLlamada.bind(this));
+
+
+
     this.router.get("/promedioDuracion", this.getpromedioDuracion.bind(this));
-    this.router.get("/promedioServicio", this.getpromedioServicio.bind(this));
-    this.router.get("/promedioLlamadas", this.getpromedioLlamadas.bind(this));
-    this.router.get("/semaforo", this.getsemaforo.bind(this));
-    this.router.get("/sentimiento", this.getsentimiento.bind(this));
   }
+
+  private async getnumLlamadasPorAgente(req: Request, res: Response) {
+    try {
+      const numeroLlamadas = await db["Llamada"].count();
+      res.status(200).json({LlamadasTotales: numeroLlamadas});
+      console.log("Numero de llamadas totales");
+  } catch (err) {
+      console.log(err);
+      res.status(500).send("Error en LlamadaController");
+  }
+}
+
+private async getduracionLlamadaPorAgente(req: Request, res: Response) {
+  try {
+    res.status(200).json("H");
+    console.log("Numero de llamadas totales");
+} catch (err) {
+    console.log(err);
+    res.status(500).send("Error en LlamadaController");
+}
+}
+
+private async getpromedioServicioPorAgente(req: Request, res: Response) {
+  try {
+    res.status(200).json("H");
+    console.log("Numero de llamadas totales");
+} catch (err) {
+    console.log(err);
+    res.status(500).send("Error en LlamadaController");
+}
+}
+
+private async getpromedioSentimientoPorAgente(req: Request, res: Response) {
+  try {
+    res.status(200).json("H");
+    console.log("Numero de llamadas totales");
+} catch (err) {
+    console.log(err);
+    res.status(500).send("Error en LlamadaController");
+}
+}
+
+private async getreportesAtendidosPorAgente(req: Request, res: Response) {
+  try {
+    res.status(200).json("H");
+    console.log("Numero de llamadas totales");
+} catch (err) {
+    console.log(err);
+    res.status(500).send("Error en LlamadaController");
+}
+}
 
   private async getnumLlamadas(req: Request, res: Response) {
     try {
@@ -38,138 +89,40 @@ class LlamadaController extends AbstractController {
   }
 }
 
-  private async getfechaLlamada(req: Request, res: Response) {
-    try {
-      const fechaLlamadas = await db["Llamada"].findAll({
-        attributes: ['idLlamada','fechaInicio', 'fechaFin']
-      });
-      res.status(200).send(fechaLlamadas);
-      console.log("Obteniendo fechas de llamadas");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
-    }
-  }
-
-  private async getmotivoLlamada(req: Request, res: Response) {
-    try {
-      const motivoLlamadas = await db["Llamada"].findAll({
-        attributes: ['idLlamada','motivo']
-      });
-      res.status(200).send(motivoLlamadas);
-      console.log("Obteniendo motivo de llamadas");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
-    }
-  }
-
-  private async gettemaLlamada(req: Request, res: Response) {
-    try {
-      const temaLlamadas = await db["Llamada"].findAll({
-        attributes: ['idLlamada','tema']
-      });
-      console.log("Obteniendo tema de llamadas");
-      res.status(200).send(temaLlamadas);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
-    }
-  }
-
-  private async getduracionLlamada(req: Request, res: Response) {
-    try {
-      console.log("Calculando duración de llamadas");
-      const llamadas = await db["Llamada"].findAll({
-        attributes: ['idLlamada', 'fechaInicio', 'fechaFin']
-      });
-      const duracionLlamadas = llamadas.map((llamada: any) => {
-        const fechaInicio = new Date(llamada.fechaInicio);
-        const fechaFin = new Date(llamada.fechaFin);
-        const duracionMs = fechaFin.getTime() - fechaInicio.getTime();
-        const duracionMinutos = duracionMs / 60000;
-        return {
-          idLlamada: llamada.idLlamada,
-          duracion: duracionMinutos
-        };
-      });
-      res.status(200).json({duracionLlamadas});
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en calcularDuracionLlamada");
-    }
-  }
-
   private async getpromedioDuracion(req: Request, res: Response) {
     try {
-      const numeroLlamadas = await db["Llamada"].count();
-      const llamadas = await db["Llamada"].findAll({
-        attributes: ['fechaInicio', 'fechaFin']
+      console.log("Calculando duración promedio de llamadas por agente");
+        const llamadas = await db["Llamada"].findAll({
+        attributes: ['idUsuario', 'fechaInicio', 'fechaFin'],
+        include: {
+          model: db["Usuario"],
+          attributes: ['nombre']
+        }
       });
-      let sumaDuracionesMs = 0;
-      for (const llamada of llamadas) {
+      const duracionPorAgente: Record<string, { totalDuracion: number, totalLlamadas: number }> = {};
+        for (const llamada of llamadas) {
+        const idAgente = llamada.idUsuario.toString();
         const fechaInicio = new Date(llamada.fechaInicio);
         const fechaFin = new Date(llamada.fechaFin);
         const duracionMs = fechaFin.getTime() - fechaInicio.getTime();
-        sumaDuracionesMs += duracionMs;
+  
+        if (!duracionPorAgente[idAgente]) {
+          duracionPorAgente[idAgente] = { totalDuracion: 0, totalLlamadas: 0 };
+        }
+        duracionPorAgente[idAgente].totalDuracion += duracionMs;
+        duracionPorAgente[idAgente].totalLlamadas++;
       }
-      const duracionPromedioMs = sumaDuracionesMs / numeroLlamadas;
-      const duracionPromedioMinutos = duracionPromedioMs / 60000;
-      res.status(200).json({ duracionPromedioMinutos });
+        const promedioDuracionPorAgente = Object.entries(duracionPorAgente).map(([idAgente, { totalDuracion, totalLlamadas }]) => ({
+        idAgente,
+        tiempoPromedio: (totalDuracion / totalLlamadas) / 60000
+      }));
+        res.status(200).json(promedioDuracionPorAgente);
     } catch (error) {
       console.log(error);
-      res.status(500).send("Error en promedio de duracion de llamadas");
-    }
-  }
-     
-
-  private async getpromedioServicio(req: Request, res: Response) {
-    try {
-      const llamadas = await db["Llamada"].findAll({
-        attributes: ['calificacion']
-      });
-        let sumaCalificaciones = 0;
-      for (const llamada of llamadas) {
-        sumaCalificaciones += llamada.calificacion;
-      }
-      const promedioCalificacionServicio = sumaCalificaciones / llamadas.length;
-      res.status(200).json({ promedioCalificacionServicio });
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
+      res.status(500).send("Error en calcular duración promedio de llamadas por agente");
     }
   }
   
-
-  private async getpromedioLlamadas(req: Request, res: Response) {
-    try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
-    }
-  }
-
-  private async getsemaforo(req: Request, res: Response) {
-    try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
-    }
-  }
-
-  private async getsentimiento(req: Request, res: Response) {
-    try {
-      console.log("UsuarioController works");
-      res.status(200).send("UsuarioController works");
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en UsuarioController");
-    }
-  }
 }
 
 export default LlamadaController;
