@@ -14,6 +14,18 @@ class LlamadaController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
+    // this.router.get("/numLlamadas", this.getnumLlamadas.bind(this));
+  }
+
+  // private async getnumLlamadas(req: Request, res: Response) {
+  //   try {
+  //     console.log("UsuarioController works");
+  //     res.status(200).send("UsuarioController works");
+  //   } catch (error) {
+  //     console.log(error);
+  //     res.status(500).send("Error en UsuarioController");
+  //   }
+  // }
     //POST
     this.router.post("/contestaSatiafaccion", this.postContestaSatisfaccion.bind(this));
 

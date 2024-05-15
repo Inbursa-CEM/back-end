@@ -4,11 +4,11 @@ interface LlamadaAttributes {
   idLlamada: number;
   fechaInicio: Date;
   fechaFin: Date;
-  calificacion: number;
+  problemaResuelto: boolean;
   idUsuario: number;
-  idCliente: number;
+  idTransaccion: number;
   sentimiento: string;
-  tema: string
+  tema: string;
   motivo: string;
   urlTranscripcion: string;
 }
@@ -18,27 +18,24 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public idLlamada!: number;
     public fechaInicio!: Date;
     public fechaFin!: Date;
-    public calificacion!: number;
+    public problemaResuelto!: boolean;
     public idUsuario!: number;
-    public idCliente!: number;
+    public idTransaccion!: number;
     public sentimiento!: string;
     public tema!: string;
     public motivo!: string;
     public urlTranscripcion!: string;
 
     static associate(models: any) {
-      Llamada.belongsTo(
-        models.Usuario,
-         {
-          foreignKey: "idUsuario",
-          targetKey: "idUsuario",
-          as: "Usuario",
-        }
-      );
-      Llamada.belongsTo(models.Cliente, {
-        foreignKey: "idCliente",
-        targetKey: "idCliente",
-        as: "Cliente",
+      Llamada.belongsTo(models.Usuario, {
+        foreignKey: "idUsuario",
+        targetKey: "idUsuario",
+        as: "Usuario",
+      });
+      Llamada.belongsTo(models.Transaccion, {
+        foreignKey: "idTransaccion",
+        targetKey: "idTransaccion",
+        as: "Transaccion",
       });
     }
   }
@@ -58,8 +55,8 @@ module.exports = (sequelize: any, DataTypes: any) => {
         type: DataTypes.DATE,
         allowNull: true,
       },
-      calificacion: {
-        type: DataTypes.INTEGER,
+      problemaResuelto: {
+        type: DataTypes.BOOLEAN,
         allowNull: true,
       },
       idUsuario: {
@@ -70,12 +67,12 @@ module.exports = (sequelize: any, DataTypes: any) => {
           key: "idUsuario",
         },
       },
-      idCliente: {
+      idTransaccion: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "Cliente",
-          key: "idCliente",
+          model: "Transaccion",
+          key: "idTransaccion",
         },
       },
       sentimiento: {

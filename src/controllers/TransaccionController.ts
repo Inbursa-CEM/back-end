@@ -95,6 +95,17 @@ class TransaccionController extends AbstractController {
       res.status(500).send("Error en TransaccionController");
     }
   }
-}
+    // this.router.get("/fechaTransaccion", this.getfechaTransaccion.bind(this));
+  }
+
+  // private async getfechaTransaccion(req: Request, res: Response) {
+  //   try {
+  //     console.log("TransaccionController works");
+  //     res.status(200).send("TransaccionController works");
+  //   } catch (error) {
+  //     console.log(error);
+  //     res.status(500).send("Error en TransaccionController");
+  //   }
+  // }
 
 export default TransaccionController;

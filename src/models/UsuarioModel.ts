@@ -2,7 +2,7 @@ import { Model } from "sequelize";
 
 interface UsuarioAttributes {
   idUsuario: number;
-  idConnect: number;
+  idConnect: string;
   nombre: string;
   telefono: number;
   correo: string;
@@ -16,7 +16,7 @@ interface UsuarioAttributes {
 module.exports = (sequelize: any, DataTypes: any) => {
   class Usuario extends Model<UsuarioAttributes> implements UsuarioAttributes {
     public idUsuario!: number;
-    public idConnect!: number;
+    public idConnect!: string;
     public nombre!: string;
     public telefono!: number;
     public correo!: string;
@@ -37,6 +37,21 @@ module.exports = (sequelize: any, DataTypes: any) => {
         sourceKey: "idUsuario",
         as: "Notificacion",
       });
+      Usuario.belongsToMany(models.AreaOportunidad, {
+        through: "UsuarioArea",
+        foreignKey: "idUsuario",
+        otherKey: "idArea",
+      });
+      Usuario.belongsToMany(models.Curso, {
+        through: models.UsuarioCurso,
+        foreignKey: "idUsuario",
+        otherKey: "idCurso",
+      });
+      Usuario.belongsToMany(models.Recomendacion, {
+        through: "UsuarioRecomendacion",
+        foreignKey: "idUsuario",
+        otherKey: "idRecomendacion",
+      });
     }
   }
   Usuario.init(
@@ -48,7 +63,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
         allowNull: false,
       },
       idConnect: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       nombre: {
@@ -70,6 +85,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
       idSupervisor: {
         type: DataTypes.INTEGER,
         allowNull: true,
+        references: {
+          model: "Usuario",
+          key: "idUsuario",
+        },
       },
       departamento: {
         type: DataTypes.STRING,

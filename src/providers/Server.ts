@@ -3,7 +3,6 @@ import AbstractController from "../controllers/AbstractController";
 import db from "../models";
 
 class Server {
-  // Atributos de la clase
   private app!: express.Application;
   private port!: number;
   private env!: string;
@@ -17,8 +16,8 @@ class Server {
     this.app = express();
     this.port = appInit.port;
     this.env = appInit.env;
-    this.loadRoutes(appInit.controllers);
     this.loadMiddlewares(appInit.middlewares);
+    this.loadRoutes(appInit.controllers);
     this.connectDB();
   }
 
