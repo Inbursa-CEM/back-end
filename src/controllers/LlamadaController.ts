@@ -225,9 +225,7 @@ class LlamadaController extends AbstractController {
         { totalDuracion: number; totalLlamadas: number; nombre: string }
       > = {};
 
-      // Calcular la duración de cada llamada y acumular por agente
       for (const llamada of llamadas) {
-        // Solo procesar si fechaFin no es null
         if (llamada.fechaFin) {
           const idAgente = llamada.idUsuario.toString();
           const nombreAgente = llamada.Usuario.nombre;
@@ -243,8 +241,6 @@ class LlamadaController extends AbstractController {
           duracionPorAgente[idAgente].totalLlamadas++;
         }
       }
-
-      // Calcular el tiempo promedio de duración de llamadas por agente
       const promedioDuracionPorAgente = Object.entries(duracionPorAgente).map(
         ([idAgente, { totalDuracion, totalLlamadas, nombre }]) => ({
           idAgente,
@@ -253,7 +249,6 @@ class LlamadaController extends AbstractController {
         })
       );
 
-      // Enviar la respuesta
       res.status(200).json(promedioDuracionPorAgente);
     } catch (error) {
       console.log(error);
