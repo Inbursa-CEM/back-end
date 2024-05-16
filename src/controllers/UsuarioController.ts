@@ -47,6 +47,7 @@ class UsuarioController extends AbstractController {
       res.status(200).json(usuario);
     } catch (error) {
       console.log(error);
+      res.status(500).send("Error en UsuarioController");
     }
   }
 
@@ -60,7 +61,7 @@ class UsuarioController extends AbstractController {
 
   private async getAgentesBySupervisor(req: Request, res: Response) {
     try {
-      const idSupervisorTarget: number = req.body.idSupervisor;
+      const idSupervisorTarget = req.query.idSupervisor;
       console.log(
         "Consultando agentes por supervisor --> " + idSupervisorTarget
       );
@@ -93,28 +94,46 @@ class UsuarioController extends AbstractController {
   private async getInfoActualAgentes(req: Request, res: Response) {
     try {
       console.log("Consultando información de angentes");
-      // console.log(req.body);
-      // const supervisor = req.body.supervisor;
+      const supervisor = req.query.supervisor;
       const datos = await db["Usuario"].findAll({
-        attributes: ["idUsuario", "nombre"],
+        attributes: [
+          "idUsuario",
+          "nombre",
+          [
+            db.sequelize.literal(
+              "TIMESTAMPDIFF(SECOND, Llamada.fechaInicio, NOW())"
+            ),
+            "duracionLlamada",
+          ],
+        ],
         where: {
           rol: "agente",
-          // idSupervisor: supervisor,
-          "$Llamada.fechaFin$": null,
+          idSupervisor: supervisor,
         },
         include: {
           model: db["Llamada"],
-          attributes: ["fechaInicio"],
+          attributes: ["fechaFin"],
+          as: "Llamada",
           include: {
-            model: db["Cliente"],
-            attributes: ["nombre"],
-            as: "Cliente",
+            model: db["Transaccion"],
+            as: "Transaccion",
             required: true,
             include: {
               model: db["Tarjeta"],
-              attributes: ["saldo"],
               as: "Tarjeta",
+              attributes: ["saldo"],
               required: true,
+              include: {
+                model: db["Cuenta"],
+                as: "Cuenta",
+                required: true,
+                include: {
+                  model: db["Cliente"],
+                  as: "Cliente",
+                  required: true,
+                  attributes: ["nombre"],
+                },
+              },
             },
           },
         },
@@ -122,24 +141,22 @@ class UsuarioController extends AbstractController {
       const resultado = datos.map((agente: any) => {
         const id = agente.idUsuario;
         const nombreAgente = agente.nombre;
-        let fechaInicioLlamada = null;
+        let duracion = null;
         let nombreCliente = null;
         let saldoCliente = null;
         if (agente.Llamada && agente.Llamada.length > 0) {
           const llamada = agente.Llamada[0];
-          fechaInicioLlamada = llamada.fechaInicio;
-          nombreCliente = llamada.Cliente ? llamada.Cliente.nombre : null;
-          saldoCliente =
-            llamada.Cliente &&
-            llamada.Cliente.Tarjeta &&
-            llamada.Cliente.Tarjeta.length > 0
-              ? llamada.Cliente.Tarjeta[0].saldo
-              : null;
+          if (llamada.fechaFin === null) {
+            duracion = agente.getDataValue("duracionLlamada");
+            nombreCliente =
+              llamada.Transaccion?.Tarjeta?.Cuenta?.Cliente?.nombre ?? null;
+            saldoCliente = llamada.Transaccion?.Tarjeta?.saldo ?? null;
+          }
         }
         return {
           id,
           nombreAgente,
-          fechaInicioLlamada,
+          duracion,
           nombreCliente,
           saldoCliente,
         };
@@ -147,6 +164,7 @@ class UsuarioController extends AbstractController {
       res.status(200).json(resultado);
     } catch (error) {
       console.log(error);
+      res.status(500).send("Error en UsuarioController");
     }
   }
 }

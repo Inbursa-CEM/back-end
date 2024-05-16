@@ -99,7 +99,7 @@ class RecomendacionController extends AbstractController {
 
   private async GetAllByAgente(req: Request, res: Response) {
     try {
-      const idAgenteTarget: number = req.body.idAgente;
+      const idAgenteTarget = req.query.idAgente;
       console.log(
         "Consultado Recomendaciones del agente --> " + idAgenteTarget
       );
