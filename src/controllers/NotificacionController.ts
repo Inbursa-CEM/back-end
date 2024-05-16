@@ -24,10 +24,6 @@ class NotificacionController extends AbstractController {
       this.getObtenerNotificaciones.bind(this)
     );
     this.router.post("/mandarOneonOne", this.postMandarOneonOne.bind(this));
-    // this.router.get(
-    //   "/obtenerNotificaciones/:idUsuario",
-    //   this.getObtenerNotificaciones.bind(this)
-    // );
   }
 
   private async postMandarNotificacion(req: Request, res: Response) {
@@ -56,25 +52,18 @@ class NotificacionController extends AbstractController {
 
   private async getObtenerNotificaciones(req: Request, res: Response) {
     try {
+      const idUsuario = req.params.idUsuario;
+      const whereClause = idUsuario ? { idUsuario: idUsuario } : {};
+      const notificaciones = await db.Notificacion.findAll({
+        where: whereClause,
+        order: [["fechaHora", "DESC"]],
+      });
       console.log("Notificaciones obtenidas");
+      res.send(notificaciones);
     } catch (err) {
       console.error(err);
+      res.status(500).json({ error: "Error en NotificacionController" });
     }
-    // try {
-    //   const idUsuario = req.params.idUsuario;
-    //   const whereClause = idUsuario ? { idUsuario: idUsuario } : {};
-    //   const notificaciones = await Notificacion.findAll({
-    //     where: whereClause,
-    //     order: [
-    //       ['fechaHora', 'DESC']
-    //     ]
-    //   });
-    //   console.log("Notificaciones obtenidas");
-    //   res.send(notificaciones);
-    // } catch (err) {
-    //   console.error(err);
-    //   res.status(500).json({ error: 'Error en NotificacionController' });
-    // }
   }
 }
 
