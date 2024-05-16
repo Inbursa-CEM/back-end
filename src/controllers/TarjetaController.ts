@@ -15,11 +15,24 @@ class TarjetaController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
+    this.router.get("/consultar",this.getConsultar.bind(this));
+
     this.router.post("/cargarTarjetas", this.cargarTarjetas.bind(this));
     this.router.get(
       "/:idCuenta/tarjetas",
       this.getTarjetasPorCuenta.bind(this)
     );
+  }
+
+  private async getConsultar(req: Request, res: Response) {
+    try {
+      console.log("Consultar tarjetas");
+      let agentes = await db["Tarjeta"].findAll();
+      res.status(200).json(agentes);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error al consultar tarjeta");
+    }
   }
 
   private async cargarTarjetas(req: Request, res: Response) {

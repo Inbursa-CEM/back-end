@@ -13,11 +13,24 @@ class CuentaController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
+    this.router.get("/consultar",this.getConsultar.bind(this));
+
     this.router.post("/cargarCuentas", this.cargarCuentas.bind(this));
     this.router.get(
       "/:idCliente/cuentas",
       this.getCuentasPorCliente.bind(this)
     );
+  }
+
+  private async getConsultar(req: Request, res: Response) {
+    try {
+      console.log("Consultar cuentas");
+      let agentes = await db["Cuenta"].findAll();
+      res.status(200).json(agentes);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error al consultar cuenta");
+    }
   }
 
   private async cargarCuentas(req: Request, res: Response) {

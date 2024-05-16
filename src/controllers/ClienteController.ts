@@ -21,6 +21,8 @@ class ClienteController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
+    this.router.get("/consultar",this.getConsultar.bind(this));
+
     this.router.get("/id", this.getId.bind(this));
     this.router.post("/cargarClientes", this.cargarClientes.bind(this));
     this.router.get("/login", this.login.bind(this));
@@ -34,6 +36,17 @@ class ClienteController extends AbstractController {
       this.authenticateJWT.bind(this),
       this.logout.bind(this)
     );
+  }
+
+  private async getConsultar(req: Request, res: Response) {
+    try {
+      console.log("Consultar clientes");
+      let agentes = await db["Cliente"].findAll();
+      res.status(200).json(agentes);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error al consultar cliente");
+    }
   }
 
   private async getId(req: Request, res: Response) {
