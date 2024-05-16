@@ -15,6 +15,8 @@ class TransaccionController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
+    this.router.get("/consultar",this.getConsultar.bind(this));
+
     this.router.post(
       "/cargarTransacciones",
       this.cargarTransacciones.bind(this)
@@ -23,6 +25,17 @@ class TransaccionController extends AbstractController {
       "/:idCuenta/transacciones",
       this.getTransaccionesPorCuenta.bind(this)
     );
+  }
+
+  private async getConsultar(req: Request, res: Response) {
+    try {
+      console.log("Consultar transacciones");
+      let agentes = await db["Transaccion"].findAll();
+      res.status(200).json(agentes);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error al consultar transaccion");
+    }
   }
 
   private async cargarTransacciones(req: Request, res: Response) {

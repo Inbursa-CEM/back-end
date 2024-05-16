@@ -16,6 +16,9 @@ class LlamadaController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
+    this.router.get("/consultar",this.getConsultar.bind(this));
+    this.router.post("/crear",this.postCrear.bind(this));
+
     //POST
     this.router.post(
       "/contestaSatisfaccion",
@@ -58,6 +61,29 @@ class LlamadaController extends AbstractController {
       this.getpromedioServicioGeneral.bind(this)
     );
   }
+
+  private async getConsultar(req: Request, res: Response) {
+    try {
+      console.log("Consultar llamadas");
+      let agentes = await db["Llamada"].findAll();
+      res.status(200).json(agentes);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error al consultar llamada");
+    }
+  }
+
+  private async postCrear(req: Request, res: Response) {
+    try {
+        console.log(req.body);
+        await db.Llamada.create(req.body);
+        console.log("Llamada creada");
+        res.status(200).send("Llamada creada");
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error al crear llamada");
+    }
+}
 
   private async getnumLlamadasPorAgente(req: Request, res: Response) {
     try {
