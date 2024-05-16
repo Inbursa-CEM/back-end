@@ -4,7 +4,6 @@ import db from "../models";
 
 class TarjetaController extends AbstractController {
   // Singleton
-  // Atributos de clase
   private static _instance: TarjetaController;
   public static get instance(): TarjetaController {
     if (this._instance) {
@@ -16,10 +15,7 @@ class TarjetaController extends AbstractController {
 
   protected initializeRoutes(): void {
     this.router.post("/cargarTarjetas", this.cargarTarjetas.bind(this));
-    this.router.get(
-      "/:idCuenta/tarjetas",
-      this.getTarjetasPorCuenta.bind(this)
-    );
+    this.router.get("/:idCuenta/tarjetas", this.getTarjetasPorCuenta.bind(this));
   }
 
   private async cargarTarjetas(req: Request, res: Response) {
@@ -31,17 +27,16 @@ class TarjetaController extends AbstractController {
 
       const tarjetasCreadas = [];
       for (const tarjeta of tarjetas) {
-        const { idCuenta, saldo, tipo } = tarjeta;
-        if (!idCuenta || saldo == null || !tipo) {
-          return res
-            .status(400)
-            .send("Todos los campos son requeridos para cada tarjeta");
+        const { idCuenta, saldo, tipo, numCuenta } = tarjeta; // Asegúrate de que estos campos están correctos y existen en el cuerpo de la solicitud.
+        if (!idCuenta || saldo == null || !tipo || numCuenta == null) {
+          return res.status(400).send("Todos los campos son requeridos para cada tarjeta");
         }
 
         const nuevaTarjeta = await db.Tarjeta.create({
           idCuenta,
           saldo,
           tipo,
+          numCuenta // Asegurarse de que este campo es necesario y se maneja adecuadamente en la base de datos.
         });
 
         tarjetasCreadas.push(nuevaTarjeta);
