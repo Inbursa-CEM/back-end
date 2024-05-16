@@ -32,8 +32,8 @@ class UsuarioController extends AbstractController {
     try {
       const correo = req.body.correo;
       const password = req.body.password;
-      const usuario = await db.Usuario.findAll({
-        attributes: ["idUsuario", "nombre", "rol"],
+      const usuario = await db.Usuario.findOne({
+        attributes: ["idUsuario", "nombre", "rol", "urlFoto"],
         where: {
           correo: correo,
           password: password,
