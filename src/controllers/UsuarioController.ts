@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
+import { Sequelize } from 'sequelize';
 
 class UsuarioController extends AbstractController {
   // Singleton
@@ -136,13 +137,42 @@ class UsuarioController extends AbstractController {
       console.log(error);
     }
   }
+
   private async getestatusAgente(req: Request, res: Response) {
     try {
-      console.log("Se cerró sesión");
+      const supervisor = req.query.supervisor;
+      const datos = await db["Usuario"].findAll({
+        attributes: [
+          "idUsuario",
+          "nombre",
+          [
+            Sequelize.literal(
+              "IFNULL((SELECT CASE WHEN Llamada.fechaFin IS NULL THEN 'Activo' ELSE 'Inactivo' END FROM Llamada WHERE Llamada.idUsuario = Usuario.idUsuario ORDER BY Llamada.fechaFin DESC LIMIT 1), 'Inactivo')",
+              // Utilizamos 'Llamada' como el alias para la tabla 'Llamada'
+            ),
+            "EstatusDelUsuario",
+          ],
+        ],
+        where: {
+          rol: "agente",
+          idSupervisor: supervisor,
+        },
+        include: [{
+          model: db["Llamada"],
+          as: 'Llamada', // Usamos el alias 'Llamada' aquí
+          attributes: [],
+          required: false, // Establecemos required: false para que sea un LEFT JOIN
+        }],
+      });
+  
+      res.status(200).json(datos);
+      console.log("Información de agentes obtenida con éxito");
     } catch (error) {
       console.log(error);
+      res.status(500).send("Error en UsuarioController");
     }
   }
+
 }
 
 export default UsuarioController;
