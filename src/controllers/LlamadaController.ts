@@ -21,7 +21,7 @@ class LlamadaController extends AbstractController {
     this.router.get("/promedioServicioPorAgente", this.getpromedioServicioPorAgente.bind(this));
     this.router.get("/sentimientoPorAgente", this.getSentimientoPorAgente.bind(this));
     this.router.get("/reportesAtendidosPorAgente", this.getreportesAtendidosPorAgente.bind(this));
-    this.router.get("/numLlamadas", this.getnumLlamadas.bind(this));
+    this.router.get("/numLlamadasTotales", this.getnumLlamadas.bind(this));
     this.router.get("/promedioDuracion", this.getpromedioDuracion.bind(this));
     this.router.get("/promedioServicioGeneral", this.getpromedioServicioGeneral.bind(this));
   }

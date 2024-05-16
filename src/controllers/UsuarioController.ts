@@ -26,6 +26,7 @@ class UsuarioController extends AbstractController {
       this.getAgentesBySupervisor.bind(this)
     );
     this.router.get("/especifico", this.getSpecificAgent.bind(this));
+    this.router.get("/estatusAgente", this.getestatusAgente.bind(this));
   }
 
   private async iniciarSesion(req: Request, res: Response) {
@@ -131,6 +132,13 @@ class UsuarioController extends AbstractController {
         };
       });
       res.status(200).json(resultado);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  private async getestatusAgente(req: Request, res: Response) {
+    try {
+      console.log("Se cerró sesión");
     } catch (error) {
       console.log(error);
     }
