@@ -30,7 +30,21 @@ class UsuarioController extends AbstractController {
 
   private async iniciarSesion(req: Request, res: Response) {
     try {
-      console.log("Se inicio sesión");
+      const correo = req.body.correo;
+      const password = req.body.password;
+      const usuario = await db.Usuario.findOne({
+        attributes: ["idUsuario", "nombre", "rol", "urlFoto"],
+        where: {
+          correo: correo,
+          password: password,
+        },
+      });
+      if (usuario.length === 0) {
+        res.status(404).send("Usuario no encontrado");
+        return;
+      }
+      console.log("Se inició sesión");
+      res.status(200).json(usuario);
     } catch (error) {
       console.log(error);
     }
