@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
-import { Sequelize } from 'sequelize';
 
 class UsuarioController extends AbstractController {
   // Singleton
@@ -170,41 +169,35 @@ class UsuarioController extends AbstractController {
     }
   }
 
-  private async getestatusAgente(req: Request, res: Response) {
+  public async getestatusAgente(req: Request, res: Response) {
     try {
-      const supervisor = req.query.supervisor;
-      const datos = await db["Usuario"].findAll({
-        attributes: [
-          "idUsuario",
-          "nombre",
-          [
-            Sequelize.literal(
-              "IFNULL((SELECT CASE WHEN Llamada.fechaFin IS NULL THEN 'Activo' ELSE 'Inactivo' END FROM Llamada WHERE Llamada.idUsuario = Usuario.idUsuario ORDER BY Llamada.fechaFin DESC LIMIT 1), 'Inactivo')",
-              // Utilizamos 'Llamada' como el alias para la tabla 'Llamada'
-            ),
-            "EstatusDelUsuario",
-          ],
-        ],
-        where: {
-          rol: "agente",
-          idSupervisor: supervisor,
-        },
-        include: [{
-          model: db["Llamada"],
-          as: 'Llamada', // Usamos el alias 'Llamada' aquí
-          attributes: [],
-          required: false, // Establecemos required: false para que sea un LEFT JOIN
-        }],
+      const { idUsuario } = req.query;
+      if (!idUsuario) {
+        return res.status(400).send("Se requiere el idUsuario");
+      }
+      const usuario = await db["Usuario"].findByPk(idUsuario, {
+        attributes: ["nombre"],
       });
-  
-      res.status(200).json(datos);
-      console.log("Información de agentes obtenida con éxito");
-    } catch (error) {
-      console.log(error);
+      if (!usuario) {
+        return res.status(404).send("Usuario no encontrado");
+      }
+      const ultimaLlamada = await db["Llamada"].findOne({
+        where: {
+          idUsuario,
+        },
+        order: [["fechaInicio", "DESC"]],
+        attributes: ["fechaFin"],
+      });
+      const estaActivo = ultimaLlamada && !ultimaLlamada.fechaFin;
+      return res.status(200).json({
+        nombre: usuario.nombre,
+        estado: estaActivo ? "activo" : "inactivo",
+      });
+    } catch (err) {
+      console.error(err);
       res.status(500).send("Error en UsuarioController");
     }
   }
-
 }
 
 export default UsuarioController;

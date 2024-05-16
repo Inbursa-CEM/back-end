@@ -206,45 +206,58 @@ class LlamadaController extends AbstractController {
     }
   }
 
-  private async getpromedioDuracionPorAgente(req: Request, res: Response) {
+  public async getpromedioDuracionPorAgente(req: Request, res: Response) {
     try {
       console.log("Calculando duración promedio de llamadas por agente");
+      
+      // Obtener todas las llamadas incluyendo la información del usuario
       const llamadas = await db["Llamada"].findAll({
         attributes: ["idUsuario", "fechaInicio", "fechaFin"],
-        // include: {
-        //   model: db["Usuario"],
-        //   attributes: ['nombre']
-        // }
+        include: [{
+          model: db["Usuario"],
+          attributes: ["nombre"],
+          as: 'Usuario' // Usar el alias definido
+        }]
       });
+
       const duracionPorAgente: Record<
         string,
-        { totalDuracion: number; totalLlamadas: number }
+        { totalDuracion: number; totalLlamadas: number; nombre: string }
       > = {};
-      for (const llamada of llamadas) {
-        const idAgente = llamada.idUsuario.toString();
-        const fechaInicio = new Date(llamada.fechaInicio);
-        const fechaFin = new Date(llamada.fechaFin);
-        const duracionMs = fechaFin.getTime() - fechaInicio.getTime();
-        // let nombre = llamada.idUsuario.toString();
 
-        if (!duracionPorAgente[idAgente]) {
-          duracionPorAgente[idAgente] = { totalDuracion: 0, totalLlamadas: 0 };
+      // Calcular la duración de cada llamada y acumular por agente
+      for (const llamada of llamadas) {
+        // Solo procesar si fechaFin no es null
+        if (llamada.fechaFin) {
+          const idAgente = llamada.idUsuario.toString();
+          const nombreAgente = llamada.Usuario.nombre;
+          const fechaInicio = new Date(llamada.fechaInicio);
+          const fechaFin = new Date(llamada.fechaFin);
+          const duracionMs = fechaFin.getTime() - fechaInicio.getTime();
+
+          if (!duracionPorAgente[idAgente]) {
+            duracionPorAgente[idAgente] = { totalDuracion: 0, totalLlamadas: 0, nombre: nombreAgente };
+          }
+
+          duracionPorAgente[idAgente].totalDuracion += duracionMs;
+          duracionPorAgente[idAgente].totalLlamadas++;
         }
-        duracionPorAgente[idAgente].totalDuracion += duracionMs;
-        duracionPorAgente[idAgente].totalLlamadas++;
       }
+
+      // Calcular el tiempo promedio de duración de llamadas por agente
       const promedioDuracionPorAgente = Object.entries(duracionPorAgente).map(
-        ([idAgente, { totalDuracion, totalLlamadas }]) => ({
+        ([idAgente, { totalDuracion, totalLlamadas, nombre }]) => ({
           idAgente,
-          tiempoPromedio: totalDuracion / totalLlamadas / 60000,
+          nombre,
+          tiempoPromedio: totalDuracion / totalLlamadas / 60000, // Convertir a minutos
         })
       );
+
+      // Enviar la respuesta
       res.status(200).json(promedioDuracionPorAgente);
     } catch (error) {
       console.log(error);
-      res
-        .status(500)
-        .send("Error en calcular duración promedio de llamadas por agente");
+      res.status(500).send("Error en calcular duración promedio de llamadas por agente");
     }
   }
 
