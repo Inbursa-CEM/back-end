@@ -16,8 +16,8 @@ class LlamadaController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
-    this.router.get("/consultar",this.getConsultar.bind(this));
-    this.router.post("/crear",this.postCrear.bind(this));
+    this.router.get("/consultar", this.getConsultar.bind(this));
+    this.router.get("/numLlamadas", this.getNumLlamadas.bind(this));
 
     //POST
     this.router.post(
@@ -73,17 +73,31 @@ class LlamadaController extends AbstractController {
     }
   }
 
-  private async postCrear(req: Request, res: Response) {
+  private async getNumLlamadas(req: Request, res: Response) {
     try {
-        console.log(req.body);
-        await db.Llamada.create(req.body);
-        console.log("Llamada creada");
-        res.status(200).send("Llamada creada");
+      console.log("Consultar número de llamadas");
+
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1;
+      const currentYear = currentDate.getFullYear();
+
+      const numCalls = await db["Llamada"].count({
+        where: Sequelize.where(
+          Sequelize.fn("MONTH", Sequelize.col("fechaInicio")),
+          currentMonth
+        ),
+        and: Sequelize.where(
+          Sequelize.fn("YEAR", Sequelize.col("fechaInicio")),
+          currentYear
+        ),
+      });
+
+      res.status(200).json(numCalls);
     } catch (error) {
-        console.log(error);
-        res.status(500).send("Error al crear llamada");
+      console.log(error);
+      res.status(500).send("Error al consultar llamada");
     }
-}
+  }
 
   private async getnumLlamadasPorAgente(req: Request, res: Response) {
     try {
