@@ -16,9 +16,6 @@ class LlamadaController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
-    this.router.get("/consultar", this.getConsultar.bind(this));
-    this.router.get("/numLlamadas", this.getNumLlamadas.bind(this));
-
     //POST
     this.router.post(
       "/contestaSatisfaccion",
@@ -26,16 +23,21 @@ class LlamadaController extends AbstractController {
     );
 
     // GETS
+    this.router.get("/consultar", this.getConsultar.bind(this));
+  
     this.router.get(
       "/promedioDuracionAgente",
       this.getPromedioDuracionAgente.bind(this)
     );
-    this.router.get("/numLlamadasAgente", this.getNumLlamadasAgente.bind(this));
-    this.router.get("/satisfaccion", this.getSatisfaccion.bind(this));
+
+    // this.router.get("/numLlamadasAgente", this.getNumLlamadasAgente.bind(this));
+    // this.router.get("/satisfaccion", this.getSatisfaccion.bind(this));
+
     this.router.get(
       "/numLlamadasPorAgente",
       this.getnumLlamadasPorAgente.bind(this)
     );
+  
     this.router.get(
       "/promedioServicioPorAgente",
       this.getpromedioServicioPorAgente.bind(this)
@@ -60,6 +62,35 @@ class LlamadaController extends AbstractController {
       "/promedioServicioGeneral",
       this.getpromedioServicioGeneral.bind(this)
     );
+    
+    this.router.get("/promedioDuracion", this.getPromedioDuracion.bind(this));
+    this.router.get("/numLlamadas", this.getNumLlamadas.bind(this));
+    this.router.get("/satisfaccion", this.getSatisfaccion.bind(this));
+
+    this.router.get("/Agentes", this.getAgentes.bind(this));
+
+  }
+
+  //llamada/Agentes?idUsuario=2
+  //  [Sequelize.fn('TIME', Sequelize.col('fechaInicio')), 'horaInicio'],
+  // [Sequelize.fn('TIME', Sequelize.col('fechaFin')), 'horaFin'],
+  private async getAgentes(req: Request, res: Response) {
+    const usuario = req.query.idUsuario;
+    // const fecha = "2024-05-11T10:30:00.000Z";
+    try {
+      const agentes = await db["Llamada"].findAll({
+        attributes: ["fechaInicio", "fechaFin"],
+        where: {
+          idUsuario: usuario,
+          // fechaInicio: fecha
+        },
+      });
+
+      res.status(200).json(agentes);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error en UsuarioController");
+    }
   }
 
   private async getConsultar(req: Request, res: Response) {
@@ -67,32 +98,6 @@ class LlamadaController extends AbstractController {
       console.log("Consultar llamadas");
       let agentes = await db["Llamada"].findAll();
       res.status(200).json(agentes);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error al consultar llamada");
-    }
-  }
-
-  private async getNumLlamadas(req: Request, res: Response) {
-    try {
-      console.log("Consultar número de llamadas");
-
-      const currentDate = new Date();
-      const currentMonth = currentDate.getMonth() + 1;
-      const currentYear = currentDate.getFullYear();
-
-      const numCalls = await db["Llamada"].count({
-        where: Sequelize.where(
-          Sequelize.fn("MONTH", Sequelize.col("fechaInicio")),
-          currentMonth
-        ),
-        and: Sequelize.where(
-          Sequelize.fn("YEAR", Sequelize.col("fechaInicio")),
-          currentYear
-        ),
-      });
-
-      res.status(200).json(numCalls);
     } catch (error) {
       console.log(error);
       res.status(500).send("Error al consultar llamada");
@@ -350,70 +355,110 @@ class LlamadaController extends AbstractController {
 
       res.status(200).json(resultado);
     } catch (error) {
+  //llamada/promedioDuracion?idUsuario=2
+  //Falta probarlo con fechaActual
+    }
+  }
+
+  
+  //llamada/numLlamadas?idUsuario=2
+  //Falta probarlo con la fechaActual
+  private async getNumLlamadas(req: Request, res: Response) {
+    try {
+      const idAgente = req.query.idUsuario;
+      // const fechaActual = literal('CURRENT_DATE');
+  
+      const numLlamadas = await db["Llamada"].count({
+        where: {
+          idUsuario: idAgente,
+          // fechaInicio: [Sequelize.fn('DATE', sequelize.col('fechaInicio')), 'fechaInicio'],
+
+          // fechaInicio: Sequelize.literal('DATE(fechaInicio) = DATE(:fechaActual)'),
+        },
+        // replacements: { fechaActual }
+      });
+  
+      res.status(200).json({"numLlamadas":numLlamadas});
+    }catch (error) {
       console.log(error);
       res.status(500).send("Error en Llamada Controller");
     }
   }
 
-  private async getNumLlamadasAgente(req: Request, res: Response) {
-    try {
-      const idAgenteTarget = req.body.idAgente;
-      const currentDate = literal("CURRENT_DATE");
+  //llamada/promedioDuracion?idUsuario=2
+  //Falta probarlo con fechaActual
+  private async getPromedioDuracion(req: Request, res: Response) {
+    const usuario = req.query.idUsuario;
+    // const fechaActual = literal('CURRENT_DATE');
+    const fecha = "2024-05-11T10:30:00.000Z";
 
-      const numLlamadas = await db.Llamada.count({
+    try {
+      const duraciones = await db["Llamada"].findAll({
+        attributes: [
+          [Sequelize.literal('TIMEDIFF(fechaFin, fechaInicio)'), 'duracion']
+        ],
+
         where: {
-          idAgente: idAgenteTarget,
-          fechaInicio: Sequelize.literal(
-            "DATE(fechaInicio) = DATE(:currentDate)"
-          ),
+          idUsuario: usuario,
+          fechaInicio: fecha
         },
-        replacements: { currentDate },
       });
 
-      res.status(200).json(numLlamadas);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en Llamada Controller");
-    }
+      let duracionTotalSegundos = 0;
+      for (const llamada of duraciones) {
+        const duracionSplit = llamada.getDataValue('duracion').split(':');
+        const horas = parseInt(duracionSplit[0]);
+        const minutos = parseInt(duracionSplit[1]);
+        const segundos = parseInt(duracionSplit[2]);
+        const duracionSegundos = horas * 3600 + minutos * 60 + segundos;
+        duracionTotalSegundos += duracionSegundos;
+      }
+  
+      // Calcular el promedio en segundos
+      const totalLlamadas = duraciones.length;
+      const promedioSegundos = totalLlamadas > 0 ? duracionTotalSegundos / totalLlamadas : 0;
+  
+      // Convertir el promedio de segundos a formato de duración
+      const horasPromedio = Math.floor(promedioSegundos / 3600);
+      const minutosPromedio = Math.floor((promedioSegundos % 3600) / 60);
+      const segundosPromedio = Math.floor(promedioSegundos % 60);
+  
+      const promedioDuracion = `${horasPromedio}:${minutosPromedio}:${segundosPromedio}`;
+  
+      res.status(200).json({"promedioDuracion" :promedioDuracion});
+    } 
+    catch (error) {
+    console.log(error);
+    res.status(500).send("Error en Llamada Controller");
   }
-
+  }
+  
+  //llamada
   private async getSatisfaccion(req: Request, res: Response) {
     try {
-      const idAgenteTarget: number = req.body.idAgente;
-      const currentDate = literal("CURRENT_DATE");
-
+      const idAgente = req.query.idUsuario;
+      // const currentDate = literal('CURRENT_DATE');
+  
       const queryCompleta = await db["Llamada"].findAll({
-        where: {
-          idAgente: idAgenteTarget,
-          fecha: currentDate,
+        where: { 
+          idUsuario: idAgente,
+          // fecha: currentDate
         },
         attributes: [
           [
-            db.sequelize.fn(
-              "SUM",
-              db.sequelize.literal(
-                "CASE WHEN satisfaccion = true THEN 1 ELSE 0 END"
-              )
-            ),
-            "numeroSatisfaccionTrue",
+            db.sequelize.fn('SUM', db.sequelize.literal('CASE WHEN satisfaccion = true THEN 1 ELSE 0 END')),
+            'numeroSatisfaccionTrue'
           ],
           [
-            db.sequelize.fn(
-              "SUM",
-              db.sequelize.literal(
-                "CASE WHEN satisfaccion = false THEN 1 ELSE 0 END"
-              )
-            ),
-            "numeroSatisfaccionFalse",
-          ],
-        ],
+            db.sequelize.fn('SUM', db.sequelize.literal('CASE WHEN satisfaccion = false THEN 1 ELSE 0 END')),
+            'numeroSatisfaccionFalse'
+          ]
+        ]
       });
-
+  
       const resultado = {
-        numeroSatisfaccionTrue: queryCompleta[0].get("numeroSatisfaccionTrue"),
-        numeroSatisfaccionFalse: queryCompleta[0].get(
-          "numeroSatisfaccionFalse"
-        ),
+        numeroSatisfaccionTrue: queryCompleta[0].get('numeroSatisfaccionTrue'),
+        numeroSatisfaccionFalse: queryCompleta[0].get('numeroSatisfaccionFalse')
       };
       res.status(200).json(resultado);
     } catch (error) {
