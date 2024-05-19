@@ -360,37 +360,34 @@ class LlamadaController extends AbstractController {
     }
   }
 
-  
   //llamada/numLlamadas?idUsuario=2
-  //Falta probarlo con la fechaActual
   private async getNumLlamadas(req: Request, res: Response) {
     try {
       const idAgente = req.query.idUsuario;
-      // const fechaActual = literal('CURRENT_DATE');
+      const fechaActual = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
+      const fecha = fechaActual[0].fecha_actual;
   
       const numLlamadas = await db["Llamada"].count({
         where: {
           idUsuario: idAgente,
-          // fechaInicio: [Sequelize.fn('DATE', sequelize.col('fechaInicio')), 'fechaInicio'],
-
-          // fechaInicio: Sequelize.literal('DATE(fechaInicio) = DATE(:fechaActual)'),
-        },
-        // replacements: { fechaActual }
+          fechaInicio: {
+            [db.Sequelize.Op.between]: [`${fecha} 00:00:00`, `${fecha} 23:59:59`] 
+          }
+        }
       });
   
-      res.status(200).json({"numLlamadas":numLlamadas});
-    }catch (error) {
+      res.status(200).json({ "numLlamadas": numLlamadas, "fecha": fecha });
+    } catch (error) {
       console.log(error);
       res.status(500).send("Error en Llamada Controller");
     }
   }
 
   //llamada/promedioDuracion?idUsuario=2
-  //Falta probarlo con fechaActual
   private async getPromedioDuracion(req: Request, res: Response) {
     const usuario = req.query.idUsuario;
-    // const fechaActual = literal('CURRENT_DATE');
-    const fecha = "2024-05-11T10:30:00.000Z";
+    const fechaActual = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
+    const fecha = fechaActual[0].fecha_actual;
 
     try {
       const duraciones = await db["Llamada"].findAll({
@@ -400,7 +397,9 @@ class LlamadaController extends AbstractController {
 
         where: {
           idUsuario: usuario,
-          fechaInicio: fecha
+          fechaInicio: {
+            [db.Sequelize.Op.between]: [`${fecha} 00:00:00`, `${fecha} 23:59:59`] 
+          }
         },
       });
 
@@ -433,16 +432,20 @@ class LlamadaController extends AbstractController {
   }
   }
   
-  //llamada
+  //llamada/satisfaccion?idUsuario=2
+  //Falta probarlo en general
   private async getSatisfaccion(req: Request, res: Response) {
     try {
       const idAgente = req.query.idUsuario;
-      // const currentDate = literal('CURRENT_DATE');
-  
+      const fechaActual = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
+      const fecha = fechaActual[0].fecha_actual;
+
       const queryCompleta = await db["Llamada"].findAll({
         where: { 
           idUsuario: idAgente,
-          // fecha: currentDate
+          fechaInicio: {
+            [db.Sequelize.Op.between]: [`${fecha} 00:00:00`, `${fecha} 23:59:59`] 
+          }
         },
         attributes: [
           [
