@@ -23,7 +23,14 @@ class NotificacionController extends AbstractController {
       "/obtenerNotificaciones",
       this.getObtenerNotificaciones.bind(this)
     );
-    this.router.post("/mandarOneonOne", this.postMandarOneonOne.bind(this));
+    this.router.post(
+      "/mandarOneonOne",
+      this.postMandarOneonOne.bind(this)
+    );
+    this.router.put(
+      "/actualizarStatusNotificacion",
+      this.putActualizarStatusNotificacion.bind(this)
+    )
   }
 
   private async postMandarNotificacion(req: Request, res: Response) {
@@ -60,6 +67,25 @@ class NotificacionController extends AbstractController {
       });
       console.log("Notificaciones obtenidas");
       res.send(notificaciones);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Error en NotificacionController" });
+    }
+  }
+
+  private async putActualizarStatusNotificacion(req: Request, res: Response) {
+    try {
+      const idNotificacion = req.query.idNotificacion;
+      const notificacion = await db.Notificacion.findByPk(idNotificacion);
+      {
+        notificacion.completada = true;
+        await notificacion.save();
+        console.log("Notificación actualizada");
+        res.status(200).json(notificacion);
+      }
+      // } else {
+      //   res.status(404).json({ error: "Notificación no encontrada" });
+      // }
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Error en NotificacionController" });
