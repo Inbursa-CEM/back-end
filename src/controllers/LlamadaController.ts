@@ -30,9 +30,6 @@ class LlamadaController extends AbstractController {
       this.getPromedioDuracionAgente.bind(this)
     );
 
-    // this.router.get("/numLlamadasAgente", this.getNumLlamadasAgente.bind(this));
-    // this.router.get("/satisfaccion", this.getSatisfaccion.bind(this));
-
     this.router.get(
       "/numLlamadasPorAgente",
       this.getnumLlamadasPorAgente.bind(this)
@@ -62,13 +59,39 @@ class LlamadaController extends AbstractController {
       "/promedioServicioGeneral",
       this.getpromedioServicioGeneral.bind(this)
     );
-    
+
     this.router.get("/promedioDuracion", this.getPromedioDuracion.bind(this));
     this.router.get("/numLlamadas", this.getNumLlamadas.bind(this));
     this.router.get("/satisfaccion", this.getSatisfaccion.bind(this));
 
     this.router.get("/Agentes", this.getAgentes.bind(this));
 
+  }
+
+  //Falta probar
+  private async postContestaSatisfaccion(req: Request, res: Response) {
+    try {
+      const idLlamada = req.body.idLlamada;
+      const { satisfaccion } = req.body;
+
+      const resultado = await db.Llamada.update(
+        { satisfaccion },
+        { where: { idLlamada } }
+      );
+
+      if (resultado[0] === 1) {
+        console.log("Satisfacción actualizada correctamente");
+        res.status(200).send("Satisfacción actualizada correctamente");
+      } else {
+        console.log("No se encontró la llamada con el ID proporcionado");
+        res
+          .status(404)
+          .send("No se encontró la llamada con el ID proporcionado");
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error en Llamada Controller");
+    }
   }
 
   //llamada/Agentes?idUsuario=2
@@ -293,31 +316,6 @@ class LlamadaController extends AbstractController {
     }
   }
 
-  private async postContestaSatisfaccion(req: Request, res: Response) {
-    try {
-      const idLlamada = req.body.idLlamada;
-      const { satisfaccion } = req.body;
-
-      const resultado = await db.Llamada.update(
-        { satisfaccion },
-        { where: { idLlamada } }
-      );
-
-      if (resultado[0] === 1) {
-        console.log("Satisfacción actualizada correctamente");
-        res.status(200).send("Satisfacción actualizada correctamente");
-      } else {
-        console.log("No se encontró la llamada con el ID proporcionado");
-        res
-          .status(404)
-          .send("No se encontró la llamada con el ID proporcionado");
-      }
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en Llamada Controller");
-    }
-  }
-
   private async getPromedioDuracionAgente(req: Request, res: Response) {
     try {
       const idAgenteTarget = req.body.idAgente;
@@ -355,8 +353,6 @@ class LlamadaController extends AbstractController {
 
       res.status(200).json(resultado);
     } catch (error) {
-  //llamada/promedioDuracion?idUsuario=2
-  //Falta probarlo con fechaActual
     }
   }
 
@@ -413,18 +409,16 @@ class LlamadaController extends AbstractController {
         duracionTotalSegundos += duracionSegundos;
       }
   
-      // Calcular el promedio en segundos
       const totalLlamadas = duraciones.length;
       const promedioSegundos = totalLlamadas > 0 ? duracionTotalSegundos / totalLlamadas : 0;
   
-      // Convertir el promedio de segundos a formato de duración
       const horasPromedio = Math.floor(promedioSegundos / 3600);
       const minutosPromedio = Math.floor((promedioSegundos % 3600) / 60);
       const segundosPromedio = Math.floor(promedioSegundos % 60);
   
       const promedioDuracion = `${horasPromedio}:${minutosPromedio}:${segundosPromedio}`;
   
-      res.status(200).json({"promedioDuracion" :promedioDuracion});
+      res.status(200).json({"promedioDuracion" :promedioDuracion, "fecha": fecha});
     } 
     catch (error) {
     console.log(error);
@@ -433,7 +427,7 @@ class LlamadaController extends AbstractController {
   }
   
   //llamada/satisfaccion?idUsuario=2
-  //Falta probarlo en general
+  //Falta probarlo
   private async getSatisfaccion(req: Request, res: Response) {
     try {
       const idAgente = req.query.idUsuario;
