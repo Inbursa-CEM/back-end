@@ -24,16 +24,8 @@ class ClienteController extends AbstractController {
     this.router.get("/id", this.getId.bind(this));
     this.router.post("/cargarClientes", this.cargarClientes.bind(this));
     this.router.get("/login", this.login.bind(this));
-    this.router.get(
-      "/perfil",
-      this.authenticateJWT.bind(this),
-      this.getPerfil.bind(this)
-    );
-    this.router.get(
-      "/logout",
-      this.authenticateJWT.bind(this),
-      this.logout.bind(this)
-    );
+    this.router.get("/perfil", this.authenticateJWT.bind(this), this.getPerfil.bind(this));
+    this.router.get("/logout", this.authenticateJWT.bind(this), this.logout.bind(this));
   }
 
   private async getId(req: Request, res: Response) {
