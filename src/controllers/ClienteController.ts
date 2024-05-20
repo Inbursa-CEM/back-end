@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 interface AuthenticatedRequest extends Request {
@@ -58,16 +57,13 @@ class ClienteController extends AbstractController {
       for (const cliente of clientes) {
         const { nombre, correo, password, telefono } = cliente;
         if (!nombre || !correo || !password || !telefono) {
-          return res
-            .status(400)
-            .send("Todos los campos son requeridos para cada cliente");
+          return res.status(400).send("Todos los campos son requeridos para cada cliente");
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
         const nuevoCliente = await db.Cliente.create({
           nombre,
           correo,
-          password: hashedPassword,
+          password,
           telefono,
         });
         clientesCreados.push(nuevoCliente);
@@ -93,18 +89,12 @@ class ClienteController extends AbstractController {
         return res.status(404).send("Cliente no encontrado");
       }
 
-      const isPasswordValid = await bcrypt.compare(
-        password as string,
-        cliente.password
-      );
-      if (!isPasswordValid) {
+      if (password !== cliente.password) {
         console.log("Contraseña incorrecta");
         return res.status(401).send("Contraseña incorrecta");
       }
 
-      const token = jwt.sign({ id: cliente.id }, "secret_key", {
-        expiresIn: "1h",
-      });
+      const token = jwt.sign({ id: cliente.id }, "secret_key", { expiresIn: "1h" });
       res.status(200).json({ token });
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
@@ -142,11 +132,7 @@ class ClienteController extends AbstractController {
   }
 
   // Middleware para autenticar JWT
-  private authenticateJWT(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
+  private authenticateJWT(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
