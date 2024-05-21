@@ -14,50 +14,38 @@ class TarjetaController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
-    this.router.post("/cargarTarjetas", this.cargarTarjetas.bind(this));
-    this.router.get("/:idCuenta/tarjetas", this.getTarjetasPorCuenta.bind(this));
+    this.router.post("/getTarjeta", this.getTarjeta.bind(this));
+    this.router.post("/getTarjetasxCuenta", this.getTarjetasPorCuenta.bind(this));
   }
 
-  private async cargarTarjetas(req: Request, res: Response) {
+  private async getTarjeta(req: Request, res: Response) {
     try {
-      const tarjetas = req.body;
-      if (!Array.isArray(tarjetas)) {
-        return res.status(400).send("Se espera un arreglo de tarjetas");
+      const numCuenta = req.body.numCuenta;
+      const tarjeta = await db.Tarjeta.findOne({
+        attributes: ["tipo", "saldo", "idCuenta"],
+        where: { 
+          numCuenta: numCuenta
+        },
+      });
+      if (!tarjeta) {
+        res.status(404).send("Tarjeta no encontrada");
+        return;
       }
-
-      const tarjetasCreadas = [];
-      for (const tarjeta of tarjetas) {
-        const { idCuenta, saldo, tipo, numCuenta } = tarjeta; // Asegúrate de que estos campos están correctos y existen en el cuerpo de la solicitud.
-        if (!idCuenta || saldo == null || !tipo || numCuenta == null) {
-          return res.status(400).send("Todos los campos son requeridos para cada tarjeta");
-        }
-
-        const nuevaTarjeta = await db.Tarjeta.create({
-          idCuenta,
-          saldo,
-          tipo,
-          numCuenta // Asegurarse de que este campo es necesario y se maneja adecuadamente en la base de datos.
-        });
-
-        tarjetasCreadas.push(nuevaTarjeta);
-      }
-
-      res.status(201).json(tarjetasCreadas);
+      console.log("Se obtuvo tarjeta");
+      res.status(200).json(tarjeta);
     } catch (err) {
-      console.error("Error al cargar tarjetas:", err);
-      res.status(500).send("Error al cargar tarjetas");
+      console.error("Error al obtener tarjeta:", err);
+      res.status(500).send("Error al obtener tarjeta");
     }
   }
 
   private async getTarjetasPorCuenta(req: Request, res: Response) {
     try {
-      const { idCuenta } = req.params;
-      if (!idCuenta) {
-        return res.status(400).send("ID de cuenta es requerido");
-      }
-
+      const idCuenta = req.body.idCuenta;
       const tarjetas = await db.Tarjeta.findAll({
-        where: { idCuenta },
+        where: { 
+          idCuenta: idCuenta
+        },
       });
 
       res.status(200).json(tarjetas);

@@ -15,73 +15,22 @@ class TransaccionController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
-    this.router.post(
-      "/cargarTransacciones",
-      this.cargarTransacciones.bind(this)
-    );
-    this.router.get(
-      "/:idCuenta/transacciones",
-      this.getTransaccionesPorCuenta.bind(this)
-    );
+    this.router.post("/getTransaccion", this.getTransacciones.bind(this));
   }
 
-  private async cargarTransacciones(req: Request, res: Response) {
+  private async getTransacciones(req: Request, res: Response) {
     try {
-      const transacciones = req.body;
-      if (!Array.isArray(transacciones)) {
-        return res.status(400).send("Se espera un arreglo de transacciones");
-      }
-
-      const transaccionesCreadas = [];
-      for (const transaccion of transacciones) {
-        const { idCuenta, monto, detalle, estatus, nombreTransaccion } =
-          transaccion;
-        if (
-          !idCuenta ||
-          monto == null ||
-          !detalle ||
-          !estatus ||
-          !nombreTransaccion
-        ) {
-          return res
-            .status(400)
-            .send("Todos los campos son requeridos para cada transacción");
-        }
-
-        const nuevaTransaccion = await db.Transaccion.create({
-          numCuenta: idCuenta,
-          fecha: new Date(),
-          detalle,
-          estatus,
-          monto,
-          nombre: nombreTransaccion,
-        });
-
-        transaccionesCreadas.push(nuevaTransaccion);
-      }
-
-      res.status(201).json(transaccionesCreadas);
-    } catch (err) {
-      console.error("Error al cargar transacciones:", err);
-      res.status(500).send("Error al cargar transacciones");
-    }
-  }
-
-  private async getTransaccionesPorCuenta(req: Request, res: Response) {
-    try {
-      const { idCuenta } = req.params;
-      if (!idCuenta) {
-        return res.status(400).send("ID de cuenta es requerido");
-      }
-
+      const numCuenta = req.body.numCuenta;
       const transacciones = await db.Transaccion.findAll({
-        where: { numCuenta: idCuenta },
+        where: {
+          numCuenta: numCuenta,
+        },
       });
-
       res.status(200).json(transacciones);
     } catch (err) {
       console.error("Error al obtener transacciones por cuenta:", err);
-      res.status(500).send("Error al obtener transacciones por cuenta");
+      res.status(500).send
+
     }
   }
 }
