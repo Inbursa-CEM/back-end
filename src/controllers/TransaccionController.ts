@@ -15,7 +15,8 @@ class TransaccionController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
-    this.router.post("/getTransaccion", this.getTransacciones.bind(this));
+    this.router.post("/getTransacciones", this.getTransacciones.bind(this));
+    this.router.post("/getTransaccion", this.getTransaccion.bind(this));
   }
 
   private async getTransacciones(req: Request, res: Response) {
@@ -33,6 +34,32 @@ class TransaccionController extends AbstractController {
 
     }
   }
+
+  private async getTransaccion(req: Request, res: Response) {
+    try {
+      const idTransaccion = req.body.idTransaccion;
+      const numCuenta = req.body.numCuenta;
+      const transaccion = await db.Transaccion.findOne({
+        attributes:["idTransaccion", "monto", "fecha", "detalle", "estatus", "nombre"],
+        where: {
+          idTransaccion: idTransaccion,
+          numCuenta: numCuenta,
+        },
+      });
+      if (!transaccion) {
+        return res  
+          .status(404)
+          .send("Transaccion no encontrada");
+      }
+      console.log("Transaccion encontrada")
+      res.status(200).json(transaccion);
+    } catch (err) {
+      console.error
+      res.status(500).send("Error al obtener transaccion");
+    }
+  }
 }
+
+
 
 export default TransaccionController;
