@@ -21,7 +21,7 @@ class ClienteController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
-    this.router.get("/getDatosCliente", this.getDatosCliente.bind(this));
+    this.router.post("/getDatosCliente", this.getDatosCliente.bind(this));
     
     // this.router.post("/cargarClientes", this.cargarClientes.bind(this));
     // this.router.get("/login", this.login.bind(this));
@@ -39,11 +39,13 @@ class ClienteController extends AbstractController {
 
   private async getDatosCliente(req: Request, res: Response) {
     try {
-      const correo = req.query.correo;
+      const correo = req.body.correo;
+      const password = req.body.password;
       const cliente = await db.Cliente.findOne({
         attributes: ["idCliente", "nombre", "correo"],
         where: {
           correo: correo,
+          password: password,
         },
       });
       if (cliente.length === 0) {
