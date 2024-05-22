@@ -169,35 +169,43 @@ class UsuarioController extends AbstractController {
     }
   }
 
-  public async getestatusAgente(req: Request, res: Response) {
+  private async getestatusAgente(req: Request, res: Response) {
     try {
-      const { idUsuario } = req.query;
-      if (!idUsuario) {
-        return res.status(400).send("Se requiere el idUsuario");
+      console.log("Obteniendo el estado de todos los agentes");
+      const agentes = await db["Usuario"].findAll({
+        attributes: ["idUsuario", "nombre"],
+        where: { rol: "agente" }
+      });
+  
+      if (!agentes.length) {
+        return res.status(404).send("No se encontraron agentes");
       }
-      const usuario = await db["Usuario"].findByPk(idUsuario, {
-        attributes: ["nombre"],
-      });
-      if (!usuario) {
-        return res.status(404).send("Usuario no encontrado");
-      }
-      const ultimaLlamada = await db["Llamada"].findOne({
-        where: {
-          idUsuario,
-        },
-        order: [["fechaInicio", "DESC"]],
-        attributes: ["fechaFin"],
-      });
-      const estaActivo = ultimaLlamada && !ultimaLlamada.fechaFin;
-      return res.status(200).json({
-        nombre: usuario.nombre,
-        estado: estaActivo ? "activo" : "inactivo",
-      });
+  
+      let activos = 0;
+      let inactivos = 0;
+  
+      await Promise.all(agentes.map(async (agente: any) => {
+        const ultimaLlamada = await db["Llamada"].findOne({
+          where: {
+            idUsuario: agente.idUsuario,
+          },
+          order: [["fechaInicio", "DESC"]],
+          attributes: ["fechaFin"],
+        });
+        const estaActivo = ultimaLlamada && !ultimaLlamada.fechaFin;
+        if (estaActivo) {
+          activos++;
+        } else {
+          inactivos++;
+        }
+      }));
+        return res.status(200).json({ activos, inactivos });
     } catch (err) {
       console.error(err);
       res.status(500).send("Error en UsuarioController");
     }
   }
+  
 }
 
 export default UsuarioController;
