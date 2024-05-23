@@ -67,6 +67,11 @@ class LlamadaController extends AbstractController {
           [Sequelize.fn("COUNT", "idUsuario"), "numLlamadas"],
         ],
         group: ["idUsuario"],
+        include: [{
+          model: db["Usuario"],
+          attributes: ["nombre"],
+          as: 'Usuario'
+        }],
       });
 
       res.status(200).json(numeroLlamadasPorAgente);
@@ -127,6 +132,11 @@ class LlamadaController extends AbstractController {
           ],
         ],
         group: ["idUsuario"],
+        include: [{
+          model: db["Usuario"],
+          attributes: ["nombre"],
+          as: 'Usuario'
+        }],
       });
 
       res.status(200).json(resultado);
@@ -162,6 +172,11 @@ class LlamadaController extends AbstractController {
           ],
         ],
         group: ["idUsuario"],
+        include: [{
+          model: db["Usuario"],
+          attributes: ["nombre"],
+          as: 'Usuario'
+        }],
       });
 
       res.status(200).json(resultado);
@@ -185,6 +200,11 @@ class LlamadaController extends AbstractController {
           ],
         ],
         group: ["idUsuario"],
+        include: [{
+          model: db["Usuario"],
+          attributes: ["nombre"],
+          as: 'Usuario'
+        }]
       });
 
       res.status(200).json(resultado);
@@ -210,13 +230,12 @@ class LlamadaController extends AbstractController {
     try {
       console.log("Calculando duración promedio de llamadas por agente");
       
-      // Obtener todas las llamadas incluyendo la información del usuario
       const llamadas = await db["Llamada"].findAll({
         attributes: ["idUsuario", "fechaInicio", "fechaFin"],
         include: [{
           model: db["Usuario"],
           attributes: ["nombre"],
-          as: 'Usuario' // Usar el alias definido
+          as: 'Usuario'
         }]
       });
 
@@ -245,7 +264,7 @@ class LlamadaController extends AbstractController {
         ([idAgente, { totalDuracion, totalLlamadas, nombre }]) => ({
           idAgente,
           nombre,
-          tiempoPromedio: totalDuracion / totalLlamadas / 60000, // Convertir a minutos
+          tiempoPromedio: totalDuracion / totalLlamadas / 60000,
         })
       );
 
