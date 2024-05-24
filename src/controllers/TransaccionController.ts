@@ -30,7 +30,9 @@ class TransaccionController extends AbstractController {
   private async getConsultar(req: Request, res: Response) {
     try {
       console.log("Consultar transacciones");
-      let agentes = await db["Transaccion"].findAll();
+      let agentes = await db["Transaccion"].findAll({
+        limit: 10
+      });
       res.status(200).json(agentes);
     } catch (error) {
       console.log(error);
