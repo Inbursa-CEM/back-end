@@ -36,7 +36,7 @@ class TarjetaController extends AbstractController {
 
       // Buscar al cliente por su número
       let cliente = await db["Cliente"].findOne({
-        where: { idCliente: telefono }
+        where: { telefono: telefono }
       });
       if (!cliente) {
         return res.status(404).send("Cliente no encontrado");
@@ -54,14 +54,11 @@ class TarjetaController extends AbstractController {
 
       // Obtener la tarjeta asociada a la cuenta
       let tarjeta = await db["Tarjeta"].findOne({ where: { idCuenta: cuenta.idCuenta } });
-
       if (!tarjeta) {
         return res.status(404).send("Tarjeta no encontrada para la cuenta dada");
       }
 
       res.status(200).json(tarjeta);
-      // let agentes = await db["Tarjeta"].findAll();
-      // res.status(200).json(agentes);
     } catch (error) {
       console.log(error);
       res.status(500).send("Error al consultar tarjeta");
