@@ -466,8 +466,6 @@ class LlamadaController extends AbstractController {
 
       // Esperar a que todas las promesas se resuelvan
       let numLlamadasCliente = await Promise.all(llamadasPromises);
-      // Filtrar las transacciones que si tienen llamadas
-      numLlamadasCliente = numLlamadasCliente.filter(tc => tc.llamadas.length > 0);
       res.status(200).json(numLlamadasCliente);
     } catch (error) {
       console.log(error);
