@@ -9,8 +9,6 @@ today.setHours(0, 0, 0, 0);
 const tomorrow = new Date(today);
 tomorrow.setDate(today.getDate() + 1);
 
-//const idSupervisor = req.query.idSupervisor
-
 
 class LlamadaController extends AbstractController {
   // Singleton
