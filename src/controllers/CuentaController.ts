@@ -26,35 +26,37 @@ class CuentaController extends AbstractController {
       if (!Array.isArray(cuentas)) {
         return res.status(400).send("Se espera un arreglo de cuentas");
       }
-
+  
       const cuentasCreadas = [];
       for (const cuenta of cuentas) {
-        const { idCliente, saldo, tipo } = cuenta;
-        if (!idCliente || saldo == null || !tipo) {
+        const { idCliente, saldo, tipo, numCuenta } = cuenta;
+        if (!idCliente || saldo == null || !tipo || !numCuenta) {
           return res
             .status(400)
-            .send("Todos los campos son requeridos para cada cuenta");
+            .send("Todos los campos son requeridos para cada cuenta, incluyendo el número de cuenta");
         }
-
+  
         const nuevaCuenta = await db.Cuenta.create({
           idCliente,
         });
-
+  
         const nuevaTarjeta = await db.Tarjeta.create({
           idCuenta: nuevaCuenta.idCuenta,
+          numCuenta,  // Asegúrate de pasar el número de cuenta aquí
           saldo,
           tipo,
         });
-
+  
         cuentasCreadas.push({ cuenta: nuevaCuenta, tarjeta: nuevaTarjeta });
       }
-
+  
       res.status(201).json(cuentasCreadas);
     } catch (err) {
       console.error("Error al cargar cuentas y tarjetas:", err);
       res.status(500).send("Error al cargar cuentas y tarjetas");
     }
   }
+  
 
   private async getCuentasPorCliente(req: Request, res: Response) {
     try {
