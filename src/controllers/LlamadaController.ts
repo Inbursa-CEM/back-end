@@ -9,6 +9,8 @@ today.setHours(0, 0, 0, 0);
 const tomorrow = new Date(today);
 tomorrow.setDate(today.getDate() + 1);
 
+//const idSupervisor = req.query.idSupervisor
+
 
 class LlamadaController extends AbstractController {
   // Singleton
@@ -68,6 +70,8 @@ class LlamadaController extends AbstractController {
 
   private async getnumLlamadasPorAgente(req: Request, res: Response) {
     try {
+      const idSupervisorTarget = req.query.idSupervisor
+
       const numeroLlamadasPorAgente = await db["Llamada"].findAll({
         attributes: [
           "idUsuario",
@@ -81,6 +85,7 @@ class LlamadaController extends AbstractController {
         }],
         where: {
           fechaInicio: {
+            idSupervisor: idSupervisorTarget,
             [Op.gte]: today,
             [Op.lt]: tomorrow
           }
@@ -97,6 +102,8 @@ class LlamadaController extends AbstractController {
 
   private async getpromedioServicioGeneral(req: Request, res: Response) {
     try {
+      const idSupervisorTarget = req.query.idSupervisor
+
       const resultado = await db["Llamada"].findOne({
         attributes: [
           "idUsuario",
@@ -107,10 +114,17 @@ class LlamadaController extends AbstractController {
             "promedioServicioGeneral",
           ],
         ],
+        include: [{
+          model: db["Usuario"],
+          attributes: ["nombre"],
+          as: 'Usuario'
+
+        }],
         where: {
+          idSupervisor: idSupervisorTarget,
           fechaInicio: {
             [Op.gte]: today,
-            [Op.lt]: tomorrow
+            [Op.lt]: tomorrow,
           }
         }
       });
@@ -135,6 +149,8 @@ class LlamadaController extends AbstractController {
 
   private async getreportesAtendidosPorAgente(req: Request, res: Response) {
     try {
+      const idSupervisorTarget = req.query.idSupervisor;
+
       const resultado = await db["Llamada"].findAll({
         attributes: [
           "idUsuario",
@@ -155,10 +171,11 @@ class LlamadaController extends AbstractController {
         include: [{
           model: db["Usuario"],
           attributes: ["nombre"],
-          as: 'Usuario'
+          as: 'Usuario',
         }],
         where: {
           fechaInicio: {
+            idSupervisor: idSupervisorTarget,
             [Op.gte]: today,
             [Op.lt]: tomorrow
           }
@@ -175,6 +192,8 @@ class LlamadaController extends AbstractController {
 
   private async getSentimientoPorAgente(req: Request, res: Response) {
     try {
+      const idSupervisorTarget = req.query.idSupervisor
+
       const resultado = await db["Llamada"].findAll({
         attributes: [
           "idUsuario",
@@ -201,8 +220,11 @@ class LlamadaController extends AbstractController {
         include: [{
           model: db["Usuario"],
           attributes: ["nombre"],
-          as: 'Usuario'
+          as: 'Usuario',
         }],
+        where:{
+          idSupervisor: idSupervisorTarget
+        }
       });
 
       res.status(200).json(resultado);
@@ -215,6 +237,8 @@ class LlamadaController extends AbstractController {
 
   private async getpromedioServicioPorAgente(req: Request, res: Response) {
     try {
+      const idSupervisorTarget = req.query.idSupervisor
+
       const resultado = await db["Llamada"].findAll({
         attributes: [
           "idUsuario",
@@ -232,6 +256,7 @@ class LlamadaController extends AbstractController {
           as: 'Usuario'
         }],
         where: {
+          idSupervisor: idSupervisorTarget,
           fechaInicio: {
             [Op.gte]: today,
             [Op.lt]: tomorrow
@@ -249,9 +274,17 @@ class LlamadaController extends AbstractController {
 
   private async getnumLlamadasTotales(req: Request, res: Response) {
     try {
+      const idSupervisorTarget = req.query.idSupervisor
+
       const totalLlamadasHoy = await db["Llamada"].count({
+        include: [{
+          model: db["Usuario"],
+          attributes: ["nombre"],
+          as: 'Usuario',
+        }],
         where: {
           fechaInicio: {
+            idSupervisor: idSupervisorTarget,
             [Op.gte]: today,
             [Op.lt]: tomorrow
           }
@@ -269,6 +302,8 @@ class LlamadaController extends AbstractController {
 
   public async getpromedioDuracionPorAgente(req: Request, res: Response) {
     try {
+      const idSupervisorTarget = req.query.idSupervisor
+
       console.log("Calculando duración promedio de llamadas por agente");
       
       const llamadas = await db["Llamada"].findAll({
@@ -280,6 +315,7 @@ class LlamadaController extends AbstractController {
         }],
         where: {
           fechaInicio: {
+            idSupervisor: idSupervisorTarget,
             [Op.gte]: today,
             [Op.lt]: tomorrow
           }
@@ -349,6 +385,8 @@ class LlamadaController extends AbstractController {
 
   private async getPromedioDuracionAgente(req: Request, res: Response) {
     try {
+      const idSupervisorTarget = req.query.idSupervisor
+
       console.log("Calculando duración promedio de llamadas por agente");
       const llamadas = await db["Llamada"].findAll({
         attributes: ["idUsuario", "fechaInicio", "fechaFin"],
@@ -359,6 +397,7 @@ class LlamadaController extends AbstractController {
           as: 'Usuario'
         }],
         where: {
+          idSupervisor: idSupervisorTarget,
           fechaInicio: {
             [Op.gte]: today,
             [Op.lt]: tomorrow
@@ -397,10 +436,18 @@ class LlamadaController extends AbstractController {
 
   private async getNumLlamadasAgente(req: Request, res: Response) {
     try {
+      const idSupervisorTarget = req.query.idSupervisor
+
       const idAgenteTarget = req.body.idAgente;
 
       const numLlamadas = await db.Llamada.count({
+        include: [{
+          model: db["Usuario"],
+          attributes: ["nombre"],
+          as: 'Usuario',
+        }],
         where: {
+          idSupervisor: idSupervisorTarget,
           idAgente: idAgenteTarget,
           fechaInicio: { 
             [Op.gte]: today, 
@@ -417,11 +464,19 @@ class LlamadaController extends AbstractController {
 
   private async getSatisfaccion(req: Request, res: Response) {
     try {
+      const idSupervisorTarget = req.query.idSupervisor
+
       const idAgenteTarget: number = req.body.idAgente;
       const currentDate = literal("CURRENT_DATE");
 
       const queryCompleta = await db["Llamada"].findAll({
+        include: [{
+          model: db["Usuario"],
+          attributes: ["nombre"],
+          as: 'Usuario',
+        }],
         where: {
+          idSupervisor: idSupervisorTarget,
           idAgente: idAgenteTarget,
           fecha: currentDate,
         },

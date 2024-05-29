@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
+import { Op } from "sequelize";
 
 class UsuarioController extends AbstractController {
   // Singleton
@@ -172,10 +173,18 @@ class UsuarioController extends AbstractController {
   private async getestatusAgente(req: Request, res: Response) {
     try {
       console.log("Obteniendo el estado de todos los agentes");
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      
       const agentes = await db["Usuario"].findAll({
         attributes: ["idUsuario", "nombre"],
-        where: { rol: "agente" }
-      });
+        where: {
+          rol: "agente"
+        }
+    });
   
       if (!agentes.length) {
         return res.status(404).send("No se encontraron agentes");
@@ -188,6 +197,10 @@ class UsuarioController extends AbstractController {
         const ultimaLlamada = await db["Llamada"].findOne({
           where: {
             idUsuario: agente.idUsuario,
+            fechaInicio: {
+              [Op.gte]: today,
+              [Op.lt]: tomorrow
+            }
           },
           order: [["fechaInicio", "DESC"]],
           attributes: ["fechaFin"],
