@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
 import { Sequelize, literal, Op } from "sequelize";
+//importar connection services
+import connectLens from "../services/connectLensService";
+import { ConnectContactLensClient, ListRealtimeContactAnalysisSegmentsCommand } from "@aws-sdk/client-connect-contact-lens"; // ES Modules import
 
 class LlamadaController extends AbstractController {
   // Singleton
@@ -63,6 +66,33 @@ class LlamadaController extends AbstractController {
     this.router.get("/promedioDuracion", this.getPromedioDuracion.bind(this));
     this.router.get("/numLlamadas", this.getNumLlamadas.bind(this));
     this.router.get("/problemasResueltos", this.getProblemasResueltos.bind(this));
+    //Para obtener la transcripcion requerimos como parámetro contactId
+    this.router.get("/transcripcion/:contactId", this.getTranscripcion.bind(this));
+
+  }
+
+  private async getTranscripcion(req: Request, res: Response){
+    try{
+      const contactId = req.params.contactId;
+
+      if (!contactId){
+        return res.status(400).send("Parámetro faltante: contactId")
+      }
+      const input = {
+        InstanceId: '2f285133-3727-4651-a3c1-ef5237b3839f',
+        ContactId: contactId
+      };
+      console.log("Input parameters:", input);
+
+      //Obtener la métricas actualizadas
+      const command =  await connectLens.listRealtimeContactAnalysisSegments(input).promise();
+      res.status(200).json([command]);
+
+    }catch(err){
+      console.log(err);
+      res.status(500).send("Internal server error " + err);
+
+    }
 
   }
   
@@ -332,7 +362,6 @@ class LlamadaController extends AbstractController {
       //Falta probarlo con fechaActual
     }
   }
-
   //llamada/numLlamadas?idUsuario=2
   private async getNumLlamadas(req: Request, res: Response) {
     try {

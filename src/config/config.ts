@@ -1,5 +1,5 @@
 
-import { DB_NAME, DB_PASSWORD, DB_USER, DB_HOST } from "./index";
+import { DB_NAME, DB_PASSWORD, DB_USER, DB_HOST} from "./index";
 
 export default {
   development: {
@@ -7,6 +7,7 @@ export default {
     password: DB_PASSWORD,
     database: DB_NAME,
     host: DB_HOST,
+
     dialect: "mysql",
   },
   test: {
