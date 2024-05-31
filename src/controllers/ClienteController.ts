@@ -21,7 +21,7 @@ class ClienteController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
-    this.router.get("/consultar",this.getConsultar.bind(this));
+    this.router.get("/consultar/:telefono",this.getConsultar.bind(this));
 
     this.router.get("/id", this.getId.bind(this));
     this.router.post("/cargarClientes", this.cargarClientes.bind(this));
@@ -41,8 +41,21 @@ class ClienteController extends AbstractController {
   private async getConsultar(req: Request, res: Response) {
     try {
       console.log("Consultar clientes");
-      let agentes = await db["Cliente"].findAll();
-      res.status(200).json(agentes);
+      const telefono = req.params.telefono;
+      if (!telefono) {
+        return res
+          .status(400)
+          .send("El parámetro número de cliente es requerido");
+      }
+
+      // Buscar al cliente por su número
+      let cliente = await db["Cliente"].findOne({
+        where: { telefono: telefono }
+      });
+      if (!cliente) {
+        return res.status(404).send("Cliente no encontrado");
+      }
+      res.status(200).json(cliente);
     } catch (error) {
       console.log(error);
       res.status(500).send("Error al consultar cliente");
