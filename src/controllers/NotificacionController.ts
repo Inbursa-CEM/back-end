@@ -86,10 +86,14 @@ class NotificacionController extends AbstractController {
       const solicitudAyuda = await db["Notificacion"].findAll({
         where:{
           idUsuario: idUsuario, 
-          fechaInicio: {
-            [db.Sequelize.Op.between]: [`${fecha} 00:00:00`, `${fecha} 23:59:59`] 
-          }
+          fechaHora: {
+            [db.Sequelize.Op.between]: [
+              `${fecha} 00:00:00`,
+              `${fecha} 23:59:59`,
+            ],
+          },
         },
+        order: [["fechaHora", "DESC"]]
       });
       res.status(200).json(solicitudAyuda);
     } catch(error){
