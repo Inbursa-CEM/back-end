@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
-import { Sequelize, literal, Op } from "sequelize";
+import { Sequelize, literal, Op, where } from "sequelize";
 //importar connection services
 import connectLens from "../services/connectLensService";
 import { ConnectContactLensClient, ListRealtimeContactAnalysisSegmentsCommand } from "@aws-sdk/client-connect-contact-lens"; // ES Modules import
@@ -24,6 +24,17 @@ class LlamadaController extends AbstractController {
       "/contestaProblemaResuelto",
       this.postProblemaResuelto.bind(this)
     );
+
+    this.router.post(
+      "/llamada/inicioLlamada", 
+      this.postInicioLlamada.bind(this)
+    );
+
+    this.router.post(
+      "/llamada/finLlamada", 
+      this.postFinLlamada.bind(this)
+    );
+
 
     // GETS
     this.router.get("/consultar/:telefono", this.getConsultar.bind(this));
@@ -71,6 +82,91 @@ class LlamadaController extends AbstractController {
     this.router.get("/transcripcion/:contactId", this.getTranscripcion.bind(this));
 
   }
+
+  //necesito regresar el id de la llamada para despues hacer los updates o podemos hacerlo con el contactId
+  private async postInicioLlamada(req: Request, res: Response){
+    try{
+      const fechaInicio = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
+      const fechaFin = null;
+      const problemaResuelto = null; 
+      const idAgente = req.body.idUsuario;
+      const idTransaccion = req.body.idTransaccion;
+      const sentimiento = "NEUTRAL"; 
+      const tema = null;
+      const motivo = null;
+      const urlTransaccion = null; 
+      // const contactId = req.body.contactId;
+
+      const newLlamada = await db.Llamada.post(
+        fechaInicio, 
+        fechaFin, 
+        problemaResuelto, 
+        idAgente, 
+        idTransaccion, 
+        sentimiento, 
+        tema, 
+        motivo, 
+        urlTransaccion
+        // contactId
+      ); 
+      res.status(200).send("Llamada correctamente inicializada en la base de datos")
+    }
+    catch(error){
+      res.status(500).send("Error en Llamada Controller")
+    }
+  }
+
+  private async postFinLlamada(req: Request, res: Response){
+    try{
+      const idLlamada = req.body.idLlamada;
+      const fechaFin = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
+      const problemaResuelto = req.body.problemaResuelto; 
+      const sentimiento = req.body.sentimiento;
+      const urlTransaccion = req.body.urlTransaccion; 
+ 
+      
+      const newLlamada = await db.Llamada.update(
+        fechaFin, 
+        problemaResuelto, 
+        sentimiento, 
+        urlTransaccion, 
+        {where: {idLlamada}}
+        // {where: {contactId}}
+      ); 
+
+      res.status(200).send("Llamada actualizada correctamente en la base de datos")
+    }
+    catch(error){
+      res.status(500).send("Error en Llamada Controller")
+    }
+  }
+
+  //Checar si esto es necesario 
+  private async postProblemaResuelto(req: Request, res: Response) {
+    try {
+      const idLlamada = req.body.idLlamada;
+      const { problemaResuelto } = req.body;
+
+      const resultado = await db.Llamada.update(
+        { problemaResuelto },
+        { where: { idLlamada } }
+      );
+
+      if (resultado[0] === 1) {
+        console.log("Satisfacción actualizada correctamente");
+        res.status(200).send("Satisfacción actualizada correctamente");
+      } else {
+        console.log("No se encontró la llamada con el ID proporcionado");
+        res
+          .status(404)
+          .send("No se encontró la llamada con el ID proporcionado");
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error en Llamada Controller");
+    }
+  }
+  
 
   private async getTranscripcion(req: Request, res: Response){
     try{
@@ -360,31 +456,6 @@ class LlamadaController extends AbstractController {
       res
         .status(500)
         .send("Error en calcular duración promedio de llamadas por agente");
-    }
-  }
-
-  private async postProblemaResuelto(req: Request, res: Response) {
-    try {
-      const idLlamada = req.body.idLlamada;
-      const { problemaResuelto } = req.body;
-
-      const resultado = await db.Llamada.update(
-        { problemaResuelto },
-        { where: { idLlamada } }
-      );
-
-      if (resultado[0] === 1) {
-        console.log("Satisfacción actualizada correctamente");
-        res.status(200).send("Satisfacción actualizada correctamente");
-      } else {
-        console.log("No se encontró la llamada con el ID proporcionado");
-        res
-          .status(404)
-          .send("No se encontró la llamada con el ID proporcionado");
-      }
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en Llamada Controller");
     }
   }
 
