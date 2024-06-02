@@ -172,6 +172,11 @@ class UsuarioController extends AbstractController {
 
   private async getestatusAgente(req: Request, res: Response) {
     try {
+
+      const idSupervisorTarget = req.query.idSupervisor;
+
+      
+
       console.log("Obteniendo el estado de todos los agentes");
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -182,7 +187,8 @@ class UsuarioController extends AbstractController {
       const agentes = await db["Usuario"].findAll({
         attributes: ["idUsuario", "nombre"],
         where: {
-          rol: "agente"
+          rol: "agente",
+          idSupervisor: idSupervisorTarget
         }
     });
   
@@ -205,7 +211,7 @@ class UsuarioController extends AbstractController {
           order: [["fechaInicio", "DESC"]],
           attributes: ["fechaFin"],
         });
-        const estaActivo = ultimaLlamada && !ultimaLlamada.fechaFin;
+        const estaActivo = ultimaLlamada && ultimaLlamada.fechaFin === null;
         if (estaActivo) {
           activos++;
         } else {
