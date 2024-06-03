@@ -37,7 +37,7 @@ class NotificacionController extends AbstractController {
 
   private async postMandarNotificacion(req: Request, res: Response) {
     try {
-      console.log("Notifiación enviada");
+      console.log("Notificación enviada");
     } catch (err) {
       console.error(err);
     }
@@ -45,14 +45,13 @@ class NotificacionController extends AbstractController {
 
   private async postMandarSolicitudAyuda(req: Request, res:Response){
     try{
-      
       const newSolicitudAyuda = await db.Notificacion.create({
         idUsuario: req.body.idUsuario,
         contenido: req.body.contenido,
         fechaHora: new Date(),
         completada: true
       });
-      console.log("Notifiación enviada");
+      console.log("Notificación enviada");
       res.status(200).json(newSolicitudAyuda);
     } catch(err){
       console.log(err)

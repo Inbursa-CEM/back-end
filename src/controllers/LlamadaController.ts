@@ -21,18 +21,23 @@ class LlamadaController extends AbstractController {
   protected initializeRoutes(): void {
     //POST
     this.router.post(
-      "/contestaProblemaResuelto",
-      this.postProblemaResuelto.bind(this)
-    );
-
-    this.router.post(
-      "/llamada/inicioLlamada", 
+      "/inicioLlamada", 
       this.postInicioLlamada.bind(this)
     );
 
     this.router.post(
-      "/llamada/finLlamada", 
+      "/finLlamada", 
       this.postFinLlamada.bind(this)
+    );
+
+    this.router.post(
+      "/constestaProblemaResuelto",
+      this.postProblemaResuelto.bind(this)
+    );
+
+    this.router.post(
+      "/actualizaUrlTranscripcion",
+      this.postUrlTranscripcion.bind(this)
     );
 
 
@@ -83,73 +88,58 @@ class LlamadaController extends AbstractController {
 
   }
 
-  //necesito regresar el id de la llamada para despues hacer los updates o podemos hacerlo con el contactId
+  //Necesito regresar el id de la llamada para despues hacer los updates o podemos hacerlo con el contactId
   private async postInicioLlamada(req: Request, res: Response){
-    try{
-      const fechaInicio = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
-      const fechaFin = null;
-      const problemaResuelto = null; 
-      const idAgente = req.body.idUsuario;
-      const idTransaccion = req.body.idTransaccion;
-      const sentimiento = "NEUTRAL"; 
-      const tema = null;
-      const motivo = null;
-      const urlTransaccion = null; 
-      // const contactId = req.body.contactId;
-
-      const newLlamada = await db.Llamada.post(
-        fechaInicio, 
-        fechaFin, 
-        problemaResuelto, 
-        idAgente, 
-        idTransaccion, 
-        sentimiento, 
-        tema, 
-        motivo, 
-        urlTransaccion
-        // contactId
-      ); 
-      res.status(200).send("Llamada correctamente inicializada en la base de datos")
-    }
-    catch(error){
-      res.status(500).send("Error en Llamada Controller")
-    }
+      try {
+          const newLlamada = await db.Llamada.create({
+              fechaInicio: new Date(),
+              fechaFin: null, 
+              problemaResuelto: null, 
+              idUsuario: req.body.idUsuario,
+              idTransaccion: req.body.idTransaccion,
+              sentimiento: "NEUTRAL",
+              tema: "Problema con una transacción",
+              motivo: "Quejas y reclamaciones", 
+              urlTranscripcion: null, 
+              //contactId: req.body.contactId
+          });
+          console.log("Llamada inicializado registrada")
+          res.status(200).json(newLlamada);
+      } catch(error) {
+          console.log("Error en Llamada Controller:", error);
+          res.status(500).json({error:"Error al NotificacionController"});
+      }
   }
 
+  //La urlTranscripcion y problemaResuelto se deben mandar por aparte cuando esten listos
   private async postFinLlamada(req: Request, res: Response){
     try{
       const idLlamada = req.body.idLlamada;
-      const fechaFin = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
-      const problemaResuelto = req.body.problemaResuelto; 
-      const sentimiento = req.body.sentimiento;
-      const urlTransaccion = req.body.urlTransaccion; 
- 
       
-      const newLlamada = await db.Llamada.update(
-        fechaFin, 
-        problemaResuelto, 
-        sentimiento, 
-        urlTransaccion, 
-        {where: {idLlamada}}
-        // {where: {contactId}}
+      const newLlamada = await db.Llamada.update({
+        fechaFin: new Date(), 
+        sentimiento: req.body.sentimiento 
+      },
+      {where: {idLlamada}}
+        // {where: {contactId}}\
       ); 
 
-      res.status(200).send("Llamada actualizada correctamente en la base de datos")
+      res.status(200).json(newLlamada);
+      console.log("Llamada actualizada correctamente en la base de datos");
     }
     catch(error){
-      res.status(500).send("Error en Llamada Controller")
+      res.status(500).json({error: "Error en Llamada Controller"})
     }
   }
 
-  //Checar si esto es necesario 
   private async postProblemaResuelto(req: Request, res: Response) {
     try {
       const idLlamada = req.body.idLlamada;
-      const { problemaResuelto } = req.body;
 
       const resultado = await db.Llamada.update(
-        { problemaResuelto },
-        { where: { idLlamada } }
+        {problemaResuelto: req.body.problemaResuelto},
+        { where: {idLlamada} }
+        // {where: {contactId}}
       );
 
       if (resultado[0] === 1) {
@@ -166,7 +156,33 @@ class LlamadaController extends AbstractController {
       res.status(500).send("Error en Llamada Controller");
     }
   }
-  
+
+  private async postUrlTranscripcion(req: Request, res: Response) {
+    try {
+      const idLlamada = req.body.idLlamada;
+
+      const resultado = await db.Llamada.update(
+        { urlTranscripcion: req.body.urlTranscripcion },
+        { where: { idLlamada } }
+        // {where: {contactId}}
+        
+      );
+
+      if (resultado[0] === 1) {
+        console.log("Url Transcripcion actualizado correctamente");
+        res.status(200).send("Url Transcripcion actualizado correctamente");
+      } else {
+        console.log("No se encontró la llamada con el ID proporcionado");
+        res
+          .status(404)
+          .send("No se encontró la llamada con el ID proporcionado");
+      }
+
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error en Llamada Controller");
+    }
+  }
 
   private async getTranscripcion(req: Request, res: Response){
     try{
