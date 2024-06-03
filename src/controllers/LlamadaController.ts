@@ -61,6 +61,10 @@ class LlamadaController extends AbstractController {
       this.getpromedioDuracionPorAgente.bind(this)
     );
     this.router.get(
+      "/velocidadPromedio",
+      this.getvelocidadPromedio.bind(this)
+    );
+    this.router.get(
       "/promedioServicioGeneral",
       this.getpromedioServicioGeneral.bind(this)
     );
@@ -162,51 +166,57 @@ class LlamadaController extends AbstractController {
 
   private async getreportesAtendidosPorAgente(req: Request, res: Response) {
     try {
-    const idSupervisorTarget = req.query.idSupervisor;
-
-    if (!idSupervisorTarget) {
-      return res.status(400).send("idSupervisor is required");
-    }
-
-    const resultado = await db["Llamada"].findAll({
-      attributes: [
-        "idUsuario",
-        [
-          Sequelize.literal(
-            "SUM(CASE WHEN problemaResuelto = 1 THEN 1 ELSE 0 END)"
-          ),
-          "problemasResueltos",
-        ],
-        [
-          Sequelize.literal(
-            "SUM(CASE WHEN problemaResuelto = 0 THEN 1 ELSE 0 END)"
-          ),
-          "problemasNoResueltos",
-        ],
-      ],
-      group: ["idUsuario"],
-      include: [{
-        model: db["Usuario"],
-        attributes: ["nombre"],
-        as: 'Usuario',
-        where: {
-          idSupervisor: idSupervisorTarget
-        }
-      }],
-      where: {
-        fechaInicio: {
-          [Op.gte]: today,
-          [Op.lt]: tomorrow
-        }
+      const idSupervisorTarget = req.query.idSupervisor;
+  
+      if (!idSupervisorTarget) {
+        return res.status(400).send("idSupervisor is required");
       }
-    });
+  
+      const resultado = await db["Llamada"].findAll({
+        attributes: [
+          "idUsuario",
+          [
+            Sequelize.literal(
+              "SUM(CASE WHEN problemaResuelto = 1 THEN 1 ELSE 0 END)"
+            ),
+            "problemasResueltos",
+          ],
+          [
+            Sequelize.literal(
+              "SUM(CASE WHEN problemaResuelto = 0 THEN 1 ELSE 0 END)"
+            ),
+            "problemasNoResueltos",
+          ],
+          [
+            Sequelize.literal(
+              "(SUM(CASE WHEN problemaResuelto = 1 THEN 1 ELSE 0 END) / COUNT(*))"
+            ),
+            "promedioProblemasResueltos",
+          ],
+        ],
+        group: ["idUsuario"],
+        include: [{
+          model: db["Usuario"],
+          attributes: ["nombre"],
+          as: 'Usuario',
+          where: {
+            idSupervisor: idSupervisorTarget
+          }
+        }],
+        where: {
+          fechaInicio: {
+            [Op.gte]: today,
+            [Op.lt]: tomorrow
+          }
+        }
+      });
 
-    res.status(200).json(resultado);
-    console.log("Número de problemas resueltos y no resueltos por agente");
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Error en LlamadaController");
-  }
+      res.status(200).json(resultado);
+      console.log("Número de problemas resueltos, no resueltos y promedio de resueltos por agente");
+    } catch (err) {
+      console.log(err);
+      res.status(500).send("Error en LlamadaController");
+    }
 }
 
   private async getSentimientoPorAgente(req: Request, res: Response) {
@@ -411,7 +421,6 @@ class LlamadaController extends AbstractController {
 
   private async getPromedioDuracionAgente(req: Request, res: Response) {
     try {
-      const idSupervisorTarget = req.query.idSupervisor
 
       console.log("Calculando duración promedio de llamadas por agente");
       const llamadas = await db["Llamada"].findAll({
@@ -420,10 +429,7 @@ class LlamadaController extends AbstractController {
         include: [{
           model: db["Usuario"],
           attributes: ["nombre"],
-          as: 'Usuario',
-          where: {
-            // idSupervisor: idSupervisorTarget,
-          }
+          as: 'Usuario'
         }],
         where: {
           fechaInicio: {
@@ -464,7 +470,6 @@ class LlamadaController extends AbstractController {
 
   private async getNumLlamadasAgente(req: Request, res: Response) {
     try {
-      const idSupervisorTarget = req.query.idSupervisor
 
       const idAgenteTarget = req.body.idAgente;
 
@@ -475,7 +480,6 @@ class LlamadaController extends AbstractController {
           as: 'Usuario',
         }],
         where: {
-          // idSupervisor: idSupervisorTarget,
           idAgente: idAgenteTarget,
           fechaInicio: { 
             [Op.gte]: today, 
@@ -492,7 +496,6 @@ class LlamadaController extends AbstractController {
 
   private async getSatisfaccion(req: Request, res: Response) {
     try {
-      const idSupervisorTarget = req.query.idSupervisor
 
       const idAgenteTarget: number = req.body.idAgente;
       const currentDate = literal("CURRENT_DATE");
@@ -504,7 +507,6 @@ class LlamadaController extends AbstractController {
           as: 'Usuario',
         }],
         where: {
-          // idSupervisor: idSupervisorTarget,
           idAgente: idAgenteTarget,
           fecha: currentDate,
         },
@@ -542,6 +544,67 @@ class LlamadaController extends AbstractController {
       res.status(500).send("Error en Llamada Controller");
     }
   }
+  
+  private async getvelocidadPromedio(req: Request, res: Response) {
+    try {
+      const idSupervisorTarget = req.query.idSupervisor;
+
+      if (!idSupervisorTarget) {
+        return res.status(400).send("idSupervisor is required");
+      }
+
+      console.log("Calculando duración promedio de llamadas de todos los usuarios asociados al supervisor");
+
+      const llamadas = await db["Llamada"].findAll({
+        attributes: ["fechaInicio", "fechaFin"],
+        include: [{
+          model: db["Usuario"],
+          attributes: [],
+          as: 'Usuario',
+          where: {
+            idSupervisor: idSupervisorTarget
+          }
+        }],
+        where: {
+          fechaInicio: {
+            [Op.gte]: today,
+            [Op.lt]: tomorrow
+          }
+        }
+      });
+
+      console.log(`Llamadas encontradas: ${llamadas.length}`);
+
+      let totalDuracion = 0;
+      let totalLlamadas = 0;
+
+      for (const llamada of llamadas) {
+        const fechaInicio = llamada.fechaInicio ? new Date(llamada.fechaInicio) : null;
+        const fechaFin = llamada.fechaFin ? new Date(llamada.fechaFin) : null;
+
+        if (fechaInicio && fechaFin) {
+          const duracionMs = fechaFin.getTime() - fechaInicio.getTime();
+          totalDuracion += duracionMs;
+          totalLlamadas++;
+        } else {
+          console.log(`Llamada con id ${llamada.id} tiene fechaInicio o fechaFin nulo.`);
+        }
+      }
+
+      if (totalLlamadas === 0) {
+        return res.status(200).json({ tiempoPromedio: 0 });
+      }
+
+      const velocidadPromedio = totalDuracion / totalLlamadas / 60000;
+
+      res.status(200).json({ velocidadPromedio });
+      console.log("Duración promedio de llamadas calculada");
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error en calcular duración promedio de llamadas");
+    }
+}
+
 }
 
 export default LlamadaController;
