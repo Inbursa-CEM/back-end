@@ -8,7 +8,7 @@ interface LlamadaAttributes {
   idUsuario: number;
   idTransaccion: number;
   sentimiento: string;
-  // nivelSatisfaccion: number;
+  nivelSatisfaccion: number;
   tema: string;
   motivo: string;
   urlTranscripcion: string;
@@ -81,10 +81,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      // nivelSatisfaccion: {
-      //   type: DataTypes.INTEGER,
-      //   allowNull: false,
-      // },
+      nivelSatisfaccion: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       tema: {
         type: DataTypes.STRING,
         allowNull: false,
