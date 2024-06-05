@@ -23,24 +23,34 @@ class ClienteController extends AbstractController {
 
   // Método para inicializar las rutas del controlador
   protected initializeRoutes(): void {
+    this.router.get("/consultar/:telefono",this.getConsultar.bind(this));
     this.router.post("/getDatosCliente", this.getDatosCliente.bind(this));
-    
-    // Rutas comentadas que podrían habilitarse en el futuro
-    // this.router.post("/cargarClientes", this.cargarClientes.bind(this));
-    // this.router.get("/login", this.login.bind(this));
-
-    this.router.get("/perfil", this.authenticateJWT.bind(this),
-      // Ruta comentada para obtener el perfil del cliente
-      // this.getPerfil.bind(this)
-    );
-
-    this.router.get("/logout", this.authenticateJWT.bind(this),
-      // Ruta comentada para cerrar sesión
-      // this.logout.bind(this)
-    );
   }
 
-  // Método para obtener los datos del cliente
+  private async getConsultar(req: Request, res: Response) {
+    try {
+      console.log("Consultar clientes");
+      const telefono = req.params.telefono;
+      if (!telefono) {
+        return res
+          .status(400)
+          .send("El parámetro número de cliente es requerido");
+      }
+
+      // Buscar al cliente por su número
+      let cliente = await db["Cliente"].findOne({
+        where: { telefono: telefono }
+      });
+      if (!cliente) {
+        return res.status(404).send("Cliente no encontrado");
+      }
+      res.status(200).json(cliente);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error al consultar cliente");
+    }
+  }
+
   private async getDatosCliente(req: Request, res: Response) {
     try {
       const correo = req.body.correo; // Obtener el correo del cuerpo de la solicitud
@@ -68,6 +78,8 @@ class ClienteController extends AbstractController {
       res.status(500).send("Error en Cliente login"); // Enviar un error 500 si algo falla
     }
   }
+
+  
 
   // Middleware para autenticar JWT
   private authenticateJWT(
