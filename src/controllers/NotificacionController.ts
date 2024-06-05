@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
+import { Sequelize, literal, Op, where } from "sequelize";
 
 class NotificacionController extends AbstractController {
   // Singleton
@@ -79,20 +80,18 @@ class NotificacionController extends AbstractController {
   private async getObtenerSolicitudAyuda(req: Request, res: Response){
     try{
       const idUsuario = req.query.idUsuario; 
-      const fechaActual = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
-      const fecha = fechaActual[0].fecha_actual;
+      // const fechaActual = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
+      // const fecha = fechaActual[0].fecha_actual;    
 
       const solicitudAyuda = await db["Notificacion"].findAll({
         where:{
           idUsuario: idUsuario, 
-          fechaHora: {
-            [db.Sequelize.Op.between]: [
-              `${fecha} 00:00:00`,
-              `${fecha} 23:59:59`,
-            ],
-          },
+          // fechaHora: {
+          //   [db.Sequelize.Op.between]: [`${fecha} 00:00:00`, `${fecha} 23:59:59`]
+          // }
         },
-        order: [["fechaHora", "DESC"]]
+        // replacements: { currentDate },
+        // order: [["fechaHora", "DESC"]]
       });
       res.status(200).json(solicitudAyuda);
     } catch(error){

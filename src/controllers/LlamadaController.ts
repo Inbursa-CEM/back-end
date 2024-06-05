@@ -83,12 +83,10 @@ class LlamadaController extends AbstractController {
     this.router.get("/numLlamadas", this.getNumLlamadas.bind(this));
     this.router.get("/numLlamadasCliente/:telefono", this.getNumLlamadasCliente.bind(this));
     this.router.get("/problemasResueltos", this.getProblemasResueltos.bind(this));
-    //Para obtener la transcripcion requerimos como parámetro contactId
     this.router.get("/transcripcion/:contactId", this.getTranscripcion.bind(this));
 
   }
 
-  //Necesito regresar el id de la llamada para despues hacer los updates o podemos hacerlo con el contactId
   private async postInicioLlamada(req: Request, res: Response){
       try {
           const newLlamada = await db.Llamada.create({
@@ -101,7 +99,7 @@ class LlamadaController extends AbstractController {
               tema: "Problema con una transacción",
               motivo: "Quejas y reclamaciones", 
               urlTranscripcion: null, 
-              //contactId: req.body.contactId
+              contactId: req.body.contactId
           });
           console.log("Llamada inicializado registrada")
           res.status(200).json(newLlamada);
@@ -114,14 +112,13 @@ class LlamadaController extends AbstractController {
   //La urlTranscripcion y problemaResuelto se deben mandar por aparte cuando esten listos
   private async postFinLlamada(req: Request, res: Response){
     try{
-      const idLlamada = req.body.idLlamada;
+      const contactId = req.body.contactId;
       
       const newLlamada = await db.Llamada.update({
         fechaFin: new Date(), 
         sentimiento: req.body.sentimiento 
       },
-      {where: {idLlamada}}
-        // {where: {contactId}}\
+        {where: {contactId}}
       ); 
 
       res.status(200).json(newLlamada);
@@ -134,12 +131,11 @@ class LlamadaController extends AbstractController {
 
   private async postProblemaResuelto(req: Request, res: Response) {
     try {
-      const idLlamada = req.body.idLlamada;
+      const contactId = req.body.contactId;
 
       const resultado = await db.Llamada.update(
         {problemaResuelto: req.body.problemaResuelto},
-        { where: {idLlamada} }
-        // {where: {contactId}}
+        {where: {contactId}}
       );
 
       if (resultado[0] === 1) {
@@ -159,12 +155,13 @@ class LlamadaController extends AbstractController {
 
   private async postUrlTranscripcion(req: Request, res: Response) {
     try {
-      const idLlamada = req.body.idLlamada;
+      // const idLlamada = req.body.idLlamada;
+      const contactId = req.body.contactId;
 
       const resultado = await db.Llamada.update(
         { urlTranscripcion: req.body.urlTranscripcion },
-        { where: { idLlamada } }
-        // {where: {contactId}}
+        // { where: { idLlamada } }
+        {where: {contactId}}
         
       );
 

@@ -8,10 +8,11 @@ interface LlamadaAttributes {
   idUsuario: number;
   idTransaccion: number;
   sentimiento: string;
-  // nivelSatisfaccion: number;
   tema: string;
   motivo: string;
   urlTranscripcion: string;
+  contactId: string;
+
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
@@ -23,10 +24,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public idUsuario!: number;
     public idTransaccion!: number;
     public sentimiento!: string;
-    public nivelSatisfaccion!: number;
     public tema!: string;
     public motivo!: string;
     public urlTranscripcion!: string;
+    public contactId!: string;
 
     static associate(models: any) {
       Llamada.belongsTo(models.Usuario, {
@@ -81,10 +82,6 @@ module.exports = (sequelize: any, DataTypes: any) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      // nivelSatisfaccion: {
-      //   type: DataTypes.INTEGER,
-      //   allowNull: false,
-      // },
       tema: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -96,6 +93,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
       urlTranscripcion: {
         type: DataTypes.STRING,
         allowNull: true,
+      },
+      contactId: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
     },
     {
