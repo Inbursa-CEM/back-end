@@ -32,7 +32,7 @@ class AuthenticationController extends AbstractController {
   private async signin(req: Request, res: Response) {
     const { email, password } = req.body;
     try {
-      // const login = await this.cognitoService.signInUser(email, password);
+      const login = await this.cognitoService.signInUser(email, password);
       const usuario = await db.Usuario.findOne({
         attributes: ["idUsuario", "nombre", "rol", "urlFoto"],
         where: {
@@ -40,12 +40,12 @@ class AuthenticationController extends AbstractController {
           password: password,
         },
       });
-      // if (!usuario || !login.AuthenticationResult) {
-      //   res.status(404).send("El usuario no existe");
-      //   return;
-      // }
+      if (!usuario || !login.AuthenticationResult) {
+        res.status(404).send("El usuario no existe");
+        return;
+      }
       res.status(200).send({ 
-        // ...login.AuthenticationResult,
+        ...login.AuthenticationResult,
          usuario });
     } catch (error: any) {
       res.status(500).send({ code: error.code, message: error.message }).end();

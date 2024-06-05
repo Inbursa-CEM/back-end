@@ -106,7 +106,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
       },
       meta: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
       },
     },
     {
