@@ -47,7 +47,7 @@ class UsuarioController extends AbstractController {
 
   private async getAgentesBySupervisor(req: Request, res: Response) {
     try {
-      const idSupervisorTarget: number = req.body.idSupervisor;
+      const idSupervisorTarget = req.query.idSupervisor;
       console.log(
         "Consultando agentes por supervisor --> " + idSupervisorTarget
       );
@@ -87,7 +87,7 @@ class UsuarioController extends AbstractController {
           "nombre",
           [
             db.sequelize.literal(
-              'TIMESTAMPDIFF(SECOND, Llamada.fechaInicio, NOW())'
+              "TIMESTAMPDIFF(SECOND, Llamada.fechaInicio, NOW())"
             ),
             "duracionLlamada",
           ],

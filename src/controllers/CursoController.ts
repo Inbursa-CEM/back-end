@@ -50,7 +50,7 @@ class CursoController extends AbstractController {
 
   private async GetAllByAgente(req: Request, res: Response) {
     try {
-      const idAgenteTarget: number = req.body.idAgente;
+      const idAgenteTarget = req.query.idAgente;
       console.log("Consultado Cursos del agente --> " + idAgenteTarget);
 
       let queryCompleta = await db["Usuario"].findAll({
@@ -89,7 +89,7 @@ class CursoController extends AbstractController {
 
   private async GetAllByArea(req: Request, res: Response) {
     try {
-      const idAreaTarget: number = req.body.idArea;
+      const idAreaTarget = req.query.idArea;
       console.log("Consultado Cursos del área --> " + idAreaTarget);
 
       let queryCompleta = await db["AreaOportunidad"].findAll({
