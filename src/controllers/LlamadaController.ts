@@ -2,9 +2,8 @@ import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
 import { Sequelize, literal, Op, where } from "sequelize";
-//importar connection services
+// importar connection services
 import connectLens from "../services/connectLensService";
-import { ConnectContactLensClient, ListRealtimeContactAnalysisSegmentsCommand } from "@aws-sdk/client-connect-contact-lens"; // ES Modules import
 
 class LlamadaController extends AbstractController {
   // Singleton
@@ -21,12 +20,12 @@ class LlamadaController extends AbstractController {
   protected initializeRoutes(): void {
     //POST
     this.router.post(
-      "/inicioLlamada", 
+      "/inicioLlamada",
       this.postInicioLlamada.bind(this)
     );
 
     this.router.post(
-      "/finLlamada", 
+      "/finLlamada",
       this.postFinLlamada.bind(this)
     );
 
@@ -83,22 +82,24 @@ class LlamadaController extends AbstractController {
     this.router.get("/numLlamadas", this.getNumLlamadas.bind(this));
     this.router.get("/numLlamadasCliente/:telefono", this.getNumLlamadasCliente.bind(this));
     this.router.get("/problemasResueltos", this.getProblemasResueltos.bind(this));
+    // Para obtener la transcripcion requerimos como parámetro contactId
     this.router.get("/transcripcion/:contactId", this.getTranscripcion.bind(this));
 
   }
 
+  // Necesito regresar el id de la llamada para despues hacer los updates o podemos hacerlo con el contactId
   private async postInicioLlamada(req: Request, res: Response){
       try {
           const newLlamada = await db.Llamada.create({
               fechaInicio: new Date(),
-              fechaFin: null, 
-              problemaResuelto: null, 
+              fechaFin: null,
+              problemaResuelto: null,
               idUsuario: req.body.idUsuario,
               idTransaccion: req.body.idTransaccion,
               sentimiento: "NEUTRAL",
               tema: "Problema con una transacción",
-              motivo: "Quejas y reclamaciones", 
-              urlTranscripcion: null, 
+              motivo: "Quejas y reclamaciones",
+              urlTranscripcion: null,
               contactId: req.body.contactId
           });
           console.log("Llamada inicializado registrada")
@@ -109,14 +110,14 @@ class LlamadaController extends AbstractController {
       }
   }
 
-  //La urlTranscripcion y problemaResuelto se deben mandar por aparte cuando esten listos
+  // La urlTranscripcion y problemaResuelto se deben mandar por aparte cuando esten listos
   private async postFinLlamada(req: Request, res: Response){
     try{
       const contactId = req.body.contactId;
       
       const newLlamada = await db.Llamada.update({
-        fechaFin: new Date(), 
-        sentimiento: req.body.sentimiento 
+        fechaFin: new Date(),
+        sentimiento: req.body.sentimiento
       },
         {where: {contactId}}
       ); 

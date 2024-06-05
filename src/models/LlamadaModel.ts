@@ -82,6 +82,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      // nivelSatisfaccion: {
+      //   type: DataTypes.INTEGER,
+      //   allowNull: false,
+      // },
       tema: {
         type: DataTypes.STRING,
         allowNull: false,
