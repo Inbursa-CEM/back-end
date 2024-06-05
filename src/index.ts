@@ -11,6 +11,8 @@ import TransaccionController from "./controllers/TransaccionController";
 import AreaOportunidadController from "./controllers/AreaOportunidadController";
 import CursoController from "./controllers/CursoController";
 import RecomendacionController from "./controllers/RecomendacionController";
+import CuentaController from "./controllers/CuentaController";
+import AuthenticationController from "./controllers/AuthenticationController";
 
 const server = new Server({
   port: PORT,
@@ -26,7 +28,19 @@ const server = new Server({
     AreaOportunidadController.instance,
     CursoController.instance,
     RecomendacionController.instance,
+    CuentaController.instance,
+    AuthenticationController.instance,
   ],
 });
+
+// Extendiendo la interfaz Request de Express para poder acceder a los datos del usuario
+declare global {
+  namespace Express {
+    interface Request {
+      user: string;
+      token: string;
+    }
+  }
+}
 
 server.init();
