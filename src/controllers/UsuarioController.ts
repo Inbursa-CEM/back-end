@@ -28,6 +28,8 @@ class UsuarioController extends AbstractController {
     );
     this.router.get("/especifico", this.getSpecificAgent.bind(this));
     this.router.get("/estatusAgente", this.getestatusAgente.bind(this));
+    this.router.get("/meta", this.getMetaBySupervisor.bind(this));
+    this.router.get("/meta/actualizar", this.updateMetaBySupervisor.bind(this));
   }
 
   private async iniciarSesion(req: Request, res: Response) {
@@ -225,6 +227,70 @@ class UsuarioController extends AbstractController {
     }
   }
   
+  private async updateMetaBySupervisor(req: Request, res: Response) {
+    try {
+        let { idSupervisor } = req.query;
+        let { meta } = req.body;
+
+        if (!meta && req.query.meta !== undefined) {
+            meta = req.query.meta;
+        }
+
+        if (!idSupervisor && req.query.idSupervisor !== undefined) {
+            idSupervisor = req.query.idSupervisor;
+        }
+
+        if (!idSupervisor || meta === undefined) {
+            return res.status(400).json({ error: "idSupervisor y meta son requeridos" });
+        }
+
+        const [updatedRows] = await db['Usuario'].update(
+            { meta },
+            {
+                where: {
+                    idSupervisor: Number(idSupervisor)
+                }
+            }
+        );
+
+        if (updatedRows === 0) {
+            return res.status(404).json({ error: "No se encontraron usuarios con el idSupervisor proporcionado" });
+        }
+
+        res.status(200).json({ message: "Meta actualizada correctamente para los usuarios supervisados", updatedRows });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error al actualizar la meta para los usuarios supervisados");
+    }
+}
+
+
+private async getMetaBySupervisor(req: Request, res: Response) {
+  try {
+      const { idSupervisor } = req.query;
+
+      if (!idSupervisor) {
+          return res.status(400).json({ error: "idSupervisor es requerido" });
+      }
+
+      const usuarios = await db['Usuario'].findAll({
+          attributes: ['idUsuario', 'nombre', 'meta'],
+          where: {
+              idSupervisor
+          }
+      });
+
+      if (usuarios.length === 0) {
+          return res.status(404).json({ error: "No se encontraron usuarios con el idSupervisor proporcionado" });
+      }
+
+      res.status(200).json(usuarios);
+  } catch (error) {
+      console.log(error);
+      res.status(500).send("Error al obtener la meta para los usuarios supervisados");
+  }
+}
+
 }
 
 export default UsuarioController;

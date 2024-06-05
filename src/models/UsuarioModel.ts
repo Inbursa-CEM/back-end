@@ -11,6 +11,7 @@ interface UsuarioAttributes {
   departamento: string;
   urlFoto: string;
   rol: string;
+  meta: number;
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
@@ -25,6 +26,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public departamento!: string;
     public urlFoto!: string;
     public rol!: string;
+    public meta!: number;
 
     static associate(models: any) {
       Usuario.hasMany(models.Llamada, {
@@ -100,6 +102,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
       },
       rol: {
         type: DataTypes.STRING,
+        allowNull: false,
+      },
+      meta: {
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
     },
