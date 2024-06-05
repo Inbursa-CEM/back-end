@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
+import { Op } from "sequelize";
 
 class UsuarioController extends AbstractController {
   // Singleton
@@ -27,6 +28,9 @@ class UsuarioController extends AbstractController {
       this.getAgentesBySupervisor.bind(this)
     );
     this.router.get("/especifico", this.getSpecificAgent.bind(this));
+    this.router.get("/estatusAgente", this.getestatusAgente.bind(this));
+    this.router.get("/meta", this.getMetaBySupervisor.bind(this));
+    this.router.put("/meta/actualizar", this.updateMetaBySupervisor.bind(this));
   }
 
   private async getSupervisores(req: Request, res: Response) {
@@ -153,6 +157,126 @@ class UsuarioController extends AbstractController {
       res.status(500).send("Error en UsuarioController");
     }
   }
+
+  private async getestatusAgente(req: Request, res: Response) {
+    try {
+
+      const idSupervisorTarget = req.query.idSupervisor;
+
+      
+
+      console.log("Obteniendo el estado de todos los agentes");
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      
+      const agentes = await db["Usuario"].findAll({
+        attributes: ["idUsuario", "nombre"],
+        where: {
+          rol: "agente",
+          idSupervisor: idSupervisorTarget
+        }
+    });
+  
+      if (!agentes.length) {
+        return res.status(404).send("No se encontraron agentes");
+      }
+  
+      let activos = 0;
+      let inactivos = 0;
+  
+      await Promise.all(agentes.map(async (agente: any) => {
+        const ultimaLlamada = await db["Llamada"].findOne({
+          where: {
+            idUsuario: agente.idUsuario,
+            fechaInicio: {
+              [Op.gte]: today,
+              [Op.lt]: tomorrow
+            }
+          },
+          order: [["fechaInicio", "DESC"]],
+          attributes: ["fechaFin"],
+        });
+        const estaActivo = ultimaLlamada && ultimaLlamada.fechaFin === null;
+        if (estaActivo) {
+          activos++;
+        } else {
+          inactivos++;
+        }
+      }));
+        return res.status(200).json({ activos, inactivos });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Error en UsuarioController");
+    }
+  }
+  
+  private async updateMetaBySupervisor(req: Request, res: Response) {
+    try {
+        let { idSupervisor } = req.query;
+        let { meta } = req.body;
+
+        if (!meta && req.query.meta !== undefined) {
+            meta = req.query.meta;
+        }
+
+        if (!idSupervisor && req.query.idSupervisor !== undefined) {
+            idSupervisor = req.query.idSupervisor;
+        }
+
+        if (!idSupervisor || meta === undefined) {
+            return res.status(400).json({ error: "idSupervisor y meta son requeridos" });
+        }
+
+        const [updatedRows] = await db['Usuario'].update(
+            { meta },
+            {
+                where: {
+                    idSupervisor: Number(idSupervisor)
+                }
+            }
+        );
+
+        if (updatedRows === 0) {
+            return res.status(404).json({ error: "No se encontraron usuarios con el idSupervisor proporcionado" });
+        }
+
+        res.status(200).json({ message: "Meta actualizada correctamente para los usuarios supervisados", updatedRows });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error al actualizar la meta para los usuarios supervisados");
+    }
+}
+
+
+private async getMetaBySupervisor(req: Request, res: Response) {
+  try {
+      const { idSupervisor } = req.query;
+
+      if (!idSupervisor) {
+          return res.status(400).json({ error: "idSupervisor es requerido" });
+      }
+
+      const usuarios = await db['Usuario'].findAll({
+          attributes: ['idUsuario', 'nombre', 'meta'],
+          where: {
+              idSupervisor
+          }
+      });
+
+      if (usuarios.length === 0) {
+          return res.status(404).json({ error: "No se encontraron usuarios con el idSupervisor proporcionado" });
+      }
+
+      res.status(200).json(usuarios);
+  } catch (error) {
+      console.log(error);
+      res.status(500).send("Error al obtener la meta para los usuarios supervisados");
+  }
+}
+
 }
 
 export default UsuarioController;
