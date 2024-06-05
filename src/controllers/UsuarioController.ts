@@ -15,12 +15,13 @@ class UsuarioController extends AbstractController {
   }
 
   protected initializeRoutes(): void {
-    // POST
-    this.router.post("/iniciarSesion", this.iniciarSesion.bind(this));
-    this.router.post("/cerrarSesion", this.cerrarSesion.bind(this));
-
     // GET
-    this.router.get("/infoActualAgentes", this.getInfoActualAgentes.bind(this));
+    this.router.get("/supervisores", this.getSupervisores.bind(this));
+    this.router.get(
+      "/infoActualAgentes",
+      // this.authMiddleware.verifyToken,
+      this.getInfoActualAgentes.bind(this)
+    );
     this.router.get(
       "/agentesDeSupervisor",
       this.getAgentesBySupervisor.bind(this)
@@ -28,34 +29,19 @@ class UsuarioController extends AbstractController {
     this.router.get("/especifico", this.getSpecificAgent.bind(this));
   }
 
-  private async iniciarSesion(req: Request, res: Response) {
+  private async getSupervisores(req: Request, res: Response) {
     try {
-      const correo = req.body.correo;
-      const password = req.body.password;
-      const usuario = await db.Usuario.findAll({
-        attributes: ["idUsuario", "nombre", "rol"],
+      console.log("Consultando supervisores");
+      const supervisores = await db["Usuario"].findAll({
+        attributes: ["idUsuario", "nombre"],
         where: {
-          correo: correo,
-          password: password,
+          rol: "supervisor",
         },
       });
-      if (usuario.length === 0) {
-        res.status(404).send("Usuario no encontrado");
-        return;
-      }
-      console.log("Se inició sesión");
-      res.status(200).json(usuario);
+      res.status(200).json(supervisores);
     } catch (error) {
       console.log(error);
       res.status(500).send("Error en UsuarioController");
-    }
-  }
-
-  private async cerrarSesion(req: Request, res: Response) {
-    try {
-      console.log("Se cerró sesión");
-    } catch (error) {
-      console.log(error);
     }
   }
 
