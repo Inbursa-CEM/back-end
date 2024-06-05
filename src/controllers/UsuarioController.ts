@@ -29,7 +29,7 @@ class UsuarioController extends AbstractController {
     this.router.get("/especifico", this.getSpecificAgent.bind(this));
     this.router.get("/estatusAgente", this.getestatusAgente.bind(this));
     this.router.get("/meta", this.getMetaBySupervisor.bind(this));
-    this.router.get("/meta/actualizar", this.updateMetaBySupervisor.bind(this));
+    this.router.put("/meta/actualizar", this.updateMetaBySupervisor.bind(this));
   }
 
   private async iniciarSesion(req: Request, res: Response) {
