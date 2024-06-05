@@ -133,14 +133,15 @@ class CursoController extends AbstractController {
   private async postAsignarCurso(req: Request, res: Response) {
     try {
       const asignacion = await db.UsuarioCurso.create(req.body);
-
       console.log("Asignación exitosa");
-      res.status(200).send("Asignación exitosa :)");
+      res.status(200).json("Asignación exitosa :)");
     } catch (err) {
+      console.log("ahua");
       console.log(err);
       res.status(500).send("Error en Curso Controller");
     }
   }
+
   private async postDesasignarCurso(req: Request, res: Response) {
     try {
       const desasignacion = await db.UsuarioCurso.destroy({
@@ -151,7 +152,7 @@ class CursoController extends AbstractController {
       });
 
       console.log("Desasignación exitosa");
-      res.status(200).send("Desasignación exitosa :)");
+      res.status(200).json("Desasignación exitosa :)");
     } catch (err) {
       console.log(err);
       res.status(500).send("Error en Curso Controller");
