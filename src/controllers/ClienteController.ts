@@ -3,14 +3,16 @@ import AbstractController from "./AbstractController";
 import db from "../models";
 import jwt from "jsonwebtoken";
 
+// Interfaz que extiende la Request de Express para incluir información del usuario autenticado
 interface AuthenticatedRequest extends Request {
   user?: { id: number };
 }
 
+// Clase ClienteController que extiende de AbstractController
 class ClienteController extends AbstractController {
-  // Singleton
-  // Atributos de clase
   private static _instance: ClienteController;
+
+  // Método estático para obtener la instancia única de ClienteController
   public static get instance(): ClienteController {
     if (this._instance) {
       return this._instance;
@@ -19,132 +21,74 @@ class ClienteController extends AbstractController {
     return this._instance;
   }
 
+  // Método para inicializar las rutas del controlador
   protected initializeRoutes(): void {
-    this.router.get("/id", this.getId.bind(this));
-    this.router.post("/cargarClientes", this.cargarClientes.bind(this));
-    this.router.get("/login", this.login.bind(this));
-    this.router.get("/perfil", this.authenticateJWT.bind(this), this.getPerfil.bind(this));
-    this.router.get("/logout", this.authenticateJWT.bind(this), this.logout.bind(this));
+    this.router.post("/getDatosCliente", this.getDatosCliente.bind(this));
+    
+    // Rutas comentadas que podrían habilitarse en el futuro
+    // this.router.post("/cargarClientes", this.cargarClientes.bind(this));
+    // this.router.get("/login", this.login.bind(this));
+
+    this.router.get("/perfil", this.authenticateJWT.bind(this),
+      // Ruta comentada para obtener el perfil del cliente
+      // this.getPerfil.bind(this)
+    );
+
+    this.router.get("/logout", this.authenticateJWT.bind(this),
+      // Ruta comentada para cerrar sesión
+      // this.logout.bind(this)
+    );
   }
 
-  private async getId(req: Request, res: Response) {
+  // Método para obtener los datos del cliente
+  private async getDatosCliente(req: Request, res: Response) {
     try {
-      const id = req.query.id;
-      if (!id) {
-        return res.status(400).send("ID es requerido");
-      }
+      const correo = req.body.correo; // Obtener el correo del cuerpo de la solicitud
+      const password = req.body.password; // Obtener la contraseña del cuerpo de la solicitud
+      // Buscar un cliente en la base de datos con el correo y la contraseña proporcionados
+      const cliente = await db.Cliente.findOne({
+        attributes: ["idCliente", "nombre", "correo"], // Atributos que se devolverán
+        where: {
+          correo: correo,
+          password: password,
+        },
+      });
 
-      const cliente = await db.Cliente.findByPk(id as string);
+      // Si no se encuentra ningún cliente, enviar un error 404
       if (!cliente) {
-        return res.status(404).send("Cliente no encontrado");
+        res.status(404).send("Cliente no encontrado");
+        return;
       }
 
-      res.status(200).json(cliente);
-    } catch (err) {
-      console.error("Error al encontrar cliente:", err);
-      res.status(500).send("Error al encontrar cliente");
-    }
-  }
-
-  private async cargarClientes(req: Request, res: Response) {
-    try {
-      const clientes = req.body;
-      if (!Array.isArray(clientes)) {
-        return res.status(400).send("Se espera un arreglo de clientes");
-      }
-
-      const clientesCreados = [];
-      for (const cliente of clientes) {
-        const { nombre, correo, password, telefono } = cliente;
-        if (!nombre || !correo || !password || !telefono) {
-          return res.status(400).send("Todos los campos son requeridos para cada cliente");
-        }
-
-        const nuevoCliente = await db.Cliente.create({
-          nombre,
-          correo,
-          password,
-          telefono,
-        });
-        clientesCreados.push(nuevoCliente);
-      }
-
-      res.status(201).json(clientesCreados);
-    } catch (err) {
-      console.error("Error al cargar clientes:", err);
-      res.status(500).send("Error al cargar clientes");
-    }
-  }
-
-  private async login(req: Request, res: Response) {
-    try {
-      const { correo, password } = req.query;
-      if (!correo || !password) {
-        return res.status(400).send("Correo y contraseña son requeridos");
-      }
-
-      const cliente = await db.Cliente.findOne({ where: { correo } });
-      if (!cliente) {
-        console.log("Cliente no encontrado");
-        return res.status(404).send("Cliente no encontrado");
-      }
-
-      if (password !== cliente.password) {
-        console.log("Contraseña incorrecta");
-        return res.status(401).send("Contraseña incorrecta");
-      }
-
-      const token = jwt.sign({ id: cliente.id }, "secret_key", { expiresIn: "1h" });
-      res.status(200).json({ token });
-    } catch (err) {
-      console.error("Error al iniciar sesión:", err);
-      res.status(500).send("Error al iniciar sesión");
-    }
-  }
-
-  private async getPerfil(req: AuthenticatedRequest, res: Response) {
-    try {
-      const clienteId = req.user?.id;
-      if (!clienteId) {
-        return res.status(401).send("Acceso no autorizado");
-      }
-
-      const cliente = await db.Cliente.findByPk(clienteId);
-      if (!cliente) {
-        return res.status(404).send("Cliente no encontrado");
-      }
-
-      res.status(200).json(cliente);
-    } catch (err) {
-      console.error("Error al obtener el perfil del cliente:", err);
-      res.status(500).send("Error al obtener el perfil del cliente");
-    }
-  }
-
-  private async logout(req: Request, res: Response) {
-    try {
-      // Aquí puedes manejar la lógica para el cierre de sesión, como invalidar el token
-      res.status(200).send("Sesión cerrada");
-    } catch (err) {
-      console.error("Error al cerrar sesión:", err);
-      res.status(500).send("Error al cerrar sesión");
+      // Log para indicar que se ha iniciado sesión con un cliente
+      console.log("Se inició sesión con cliente");
+      res.status(200).json(cliente); // Devolver los datos del cliente en la respuesta
+    } catch (error) {
+      console.log(error); // Log del error
+      res.status(500).send("Error en Cliente login"); // Enviar un error 500 si algo falla
     }
   }
 
   // Middleware para autenticar JWT
-  private authenticateJWT(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-    const token = req.headers.authorization?.split(" ")[1];
+  private authenticateJWT(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) {
+    const token = req.headers.authorization?.split(" ")[1]; // Obtener el token de la cabecera de autorización
 
+    // Si no hay token, enviar un error 401
     if (!token) {
       return res.status(401).send("Acceso denegado. Token no proporcionado.");
     }
 
     try {
+      // Verificar el token usando la clave secreta
       const decoded = jwt.verify(token, "secret_key") as { id: number };
-      req.user = decoded;
-      next();
+      req.user = decoded; // Añadir la información del usuario al objeto request
+      next(); // Llamar a la siguiente función en la cadena de middleware
     } catch (err) {
-      res.status(401).send("Token no válido.");
+      res.status(401).send("Token no válido."); // Enviar un error 401 si el token no es válido
     }
   }
 }

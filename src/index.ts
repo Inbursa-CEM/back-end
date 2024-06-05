@@ -13,6 +13,7 @@ import CursoController from "./controllers/CursoController";
 import RecomendacionController from "./controllers/RecomendacionController";
 import CuentaController from "./controllers/CuentaController";
 import AuthenticationController from "./controllers/AuthenticationController";
+import ReporteController from "./controllers/ReporteController";
 
 const server = new Server({
   port: PORT,
@@ -30,6 +31,7 @@ const server = new Server({
     RecomendacionController.instance,
     CuentaController.instance,
     AuthenticationController.instance,
+    ReporteController.instance,
   ],
 });
 

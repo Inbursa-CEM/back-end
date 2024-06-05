@@ -2,72 +2,80 @@ import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
 
+// Clase TransaccionController que extiende de AbstractController
 class TransaccionController extends AbstractController {
-    // Singleton
-    private static _instance: TransaccionController;
-    public static get instance(): TransaccionController {
-        if (this._instance) {
-            return this._instance;
-        }
-        this._instance = new TransaccionController("transaccion");
-        return this._instance;
+  // Atributo estático para implementar el patrón Singleton
+  private static _instance: TransaccionController;
+
+  // Método estático para obtener la instancia única de TransaccionController
+  public static get instance(): TransaccionController {
+    if (this._instance) {
+      return this._instance;
     }
+    this._instance = new TransaccionController("transaccion");
+    return this._instance;
+  }
 
-    protected initializeRoutes(): void {
-        this.router.post("/", this.cargarTransacciones.bind(this)); // Ruta para cargar transacciones
-        this.router.get("/id", this.getTransaccionesPorCuenta.bind(this)); // Ruta para obtener transacciones por ID de cuenta
+  // Método para inicializar las rutas del controlador
+  protected initializeRoutes(): void {
+    // Definición de la ruta POST para obtener todas las transacciones de una cuenta
+    this.router.post("/getTransacciones", this.getTransacciones.bind(this));
+    // Definición de la ruta POST para obtener una transacción específica
+    this.router.post("/getTransaccion", this.getTransaccion.bind(this));
+  }
+
+  // Método para obtener todas las transacciones asociadas a una cuenta específica
+  private async getTransacciones(req: Request, res: Response) {
+    try {
+      // Obtener el número de cuenta del cuerpo de la solicitud
+      const numCuenta = req.body.numCuenta;
+
+      // Buscar todas las transacciones en la base de datos asociadas al número de cuenta
+      const transacciones = await db.Transaccion.findAll({
+        where: {
+          numCuenta: numCuenta,
+        },
+      });
+
+      // Enviar las transacciones encontradas en la respuesta con un status 200
+      res.status(200).json(transacciones);
+    } catch (err) {
+      // Manejo de errores: log del error y envío de una respuesta con status 500
+      console.error("Error al obtener transacciones por cuenta:", err);
+      res.status(500).send("Error al obtener transacciones por cuenta");
     }
+  }
 
-    private async cargarTransacciones(req: Request, res: Response) {
-        try {
-            const transacciones = req.body;
-            if (!Array.isArray(transacciones)) {
-                return res.status(400).send("Se espera un arreglo de transacciones");
-            }
+  // Método para obtener una transacción específica basada en el ID de transacción y el número de cuenta
+  private async getTransaccion(req: Request, res: Response) {
+    try {
+      // Obtener el ID de la transacción y el número de cuenta del cuerpo de la solicitud
+      const idTransaccion = req.body.idTransaccion;
+      const numCuenta = req.body.numCuenta;
 
-            const transaccionesCreadas = [];
-            for (const transaccion of transacciones) {
-                const { idCuenta, monto, detalle, estatus, nombreTransaccion } = transaccion;
-                if (!idCuenta || monto == null || !detalle || !estatus || !nombreTransaccion) {
-                    return res.status(400).send("Todos los campos son requeridos para cada transacción");
-                }
+      // Buscar una transacción en la base de datos con el ID de transacción y el número de cuenta proporcionados
+      const transaccion = await db.Transaccion.findOne({
+        attributes: ["idTransaccion", "monto", "fecha", "detalle", "estatus", "nombre"], // Atributos que se devolverán
+        where: {
+          idTransaccion: idTransaccion,
+          numCuenta: numCuenta,
+        },
+      });
 
-                const nuevaTransaccion = await db.Transaccion.create({
-                    numCuenta: idCuenta,
-                    fecha: new Date(),
-                    detalle,
-                    estatus,
-                    monto,
-                    nombre: nombreTransaccion,
-                });
+      // Si no se encuentra ninguna transacción, enviar un error 404
+      if (!transaccion) {
+        return res.status(404).send("Transacción no encontrada");
+      }
 
-                transaccionesCreadas.push(nuevaTransaccion);
-            }
-
-            res.status(201).json(transaccionesCreadas);
-        } catch (err) {
-            console.error("Error al cargar transacciones:", err);
-            res.status(500).send("Error al cargar transacciones");
-        }
+      // Log para indicar que se ha encontrado una transacción
+      console.log("Transacción encontrada");
+      res.status(200).json(transaccion); // Devolver los datos de la transacción en la respuesta
+    } catch (err) {
+      // Manejo de errores: log del error y envío de una respuesta con status 500
+      console.error("Error al obtener transacción:", err);
+      res.status(500).send("Error al obtener transacción");
     }
-
-    private async getTransaccionesPorCuenta(req: Request, res: Response) {
-        try {
-            const { id } = req.query; // Cambiado a usar parámetros de consulta
-            if (!id) {
-                return res.status(400).send("ID de cuenta es requerido");
-            }
-
-            const transacciones = await db.Transaccion.findAll({
-                where: { numCuenta: id },
-            });
-
-            res.status(200).json(transacciones);
-        } catch (err) {
-            console.error("Error al obtener transacciones por cuenta:", err);
-            res.status(500).send("Error al obtener transacciones por cuenta");
-        }
-    }
+  }
 }
 
 export default TransaccionController;

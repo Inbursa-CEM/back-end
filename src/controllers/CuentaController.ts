@@ -2,79 +2,41 @@ import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
 
+// Clase CuentaController que extiende de AbstractController
 class CuentaController extends AbstractController {
+  // Atributo estático para implementar el patrón Singleton
   private static _instance: CuentaController;
+
+  // Método estático para obtener la instancia única de CuentaController
   public static get instance(): CuentaController {
     if (this._instance) {
       return this._instance;
     }
-    this._instance = new CuentaController("Cuenta");
+    this._instance = new CuentaController("cuenta");
     return this._instance;
   }
 
+  // Método para inicializar las rutas del controlador
   protected initializeRoutes(): void {
-    this.router.post("/cargarCuentas", this.cargarCuentas.bind(this));
-    this.router.get(
-      "/:idCliente/cuentas",
-      this.getCuentasPorCliente.bind(this)
-    );
+    // Definición de la ruta POST para obtener cuentas por cliente
+    this.router.post("/cuentas", this.getCuentasPorCliente.bind(this));
   }
 
-  private async cargarCuentas(req: Request, res: Response) {
-    try {
-      const cuentas = req.body;
-      if (!Array.isArray(cuentas)) {
-        return res.status(400).send("Se espera un arreglo de cuentas");
-      }
-  
-      const cuentasCreadas = [];
-      for (const cuenta of cuentas) {
-        const { idCliente, saldo, tipo, numCuenta } = cuenta;
-        if (!idCliente || saldo == null || !tipo || !numCuenta) {
-          return res
-            .status(400)
-            .send("Todos los campos son requeridos para cada cuenta, incluyendo el número de cuenta");
-        }
-  
-        const nuevaCuenta = await db.Cuenta.create({
-          idCliente,
-        });
-  
-        const nuevaTarjeta = await db.Tarjeta.create({
-          idCuenta: nuevaCuenta.idCuenta,
-          numCuenta,  // Asegúrate de pasar el número de cuenta aquí
-          saldo,
-          tipo,
-        });
-  
-        cuentasCreadas.push({ cuenta: nuevaCuenta, tarjeta: nuevaTarjeta });
-      }
-  
-      res.status(201).json(cuentasCreadas);
-    } catch (err) {
-      console.error("Error al cargar cuentas y tarjetas:", err);
-      res.status(500).send("Error al cargar cuentas y tarjetas");
-    }
-  }
-  
-
+  // Método para obtener las cuentas asociadas a un cliente
   private async getCuentasPorCliente(req: Request, res: Response) {
     try {
-      const { idCliente } = req.params;
-      if (!idCliente) {
-        return res.status(400).send("ID de cliente es requerido");
-      }
+      // Obtener el id del cliente del cuerpo de la solicitud
+      const idCliente = req.body.idCliente;
 
+      // Buscar todas las cuentas en la base de datos asociadas al id del cliente
       const cuentas = await db.Cuenta.findAll({
-        where: { idCliente },
-        include: [
-          { model: db.Tarjeta, as: "Tarjetas" },
-          { model: db.Transaccion, as: "Transacciones" },
-        ],
+        where: { idCliente: idCliente },
       });
 
+      // Enviar las cuentas encontradas en la respuesta con un status 200
       res.status(200).json(cuentas);
     } catch (err) {
+      // Manejo de errores: log del error y envío de una respuesta con status 500
       console.error("Error al obtener cuentas por cliente:", err);
       res.status(500).send("Error al obtener cuentas por cliente");
     }
