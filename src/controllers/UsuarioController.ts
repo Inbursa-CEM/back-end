@@ -28,7 +28,7 @@ class UsuarioController extends AbstractController {
       this.getAgentesBySupervisor.bind(this)
     );
     this.router.get("/especifico", this.getSpecificAgent.bind(this));
-    this.router.get("/estatusAgente", this.getestatusAgente.bind(this));
+    this.router.get("/estatusAgente", this.getEstatusAgente.bind(this));
     this.router.get("/meta", this.getMetaBySupervisor.bind(this));
     this.router.get("/meta/actualizar", this.updateMetaBySupervisor.bind(this));
   }
@@ -102,7 +102,7 @@ class UsuarioController extends AbstractController {
         },
         include: {
           model: db["Llamada"],
-          attributes: ["fechaFin"],
+          attributes: ["fechaFin", "contactId"],
           as: "Llamada",
           include: {
             model: db["Transaccion"],
@@ -131,6 +131,7 @@ class UsuarioController extends AbstractController {
       const resultado = datos.map((agente: any) => {
         const id = agente.idUsuario;
         const nombreAgente = agente.nombre;
+        let contactId = null;
         let duracion = null;
         let nombreCliente = null;
         let saldoCliente = null;
@@ -141,6 +142,7 @@ class UsuarioController extends AbstractController {
             nombreCliente =
               llamada.Transaccion?.Tarjeta?.Cuenta?.Cliente?.nombre ?? null;
             saldoCliente = llamada.Transaccion?.Tarjeta?.saldo ?? null;
+            contactId = llamada.contactId;
           }
         }
         return {
@@ -149,6 +151,7 @@ class UsuarioController extends AbstractController {
           duracion,
           nombreCliente,
           saldoCliente,
+          contactId,
         };
       });
       res.status(200).json(resultado);
@@ -158,12 +161,9 @@ class UsuarioController extends AbstractController {
     }
   }
 
-  private async getestatusAgente(req: Request, res: Response) {
+  private async getEstatusAgente(req: Request, res: Response) {
     try {
-
       const idSupervisorTarget = req.query.idSupervisor;
-
-      
 
       console.log("Obteniendo el estado de todos los agentes");
       const today = new Date();
@@ -171,113 +171,121 @@ class UsuarioController extends AbstractController {
 
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
-      
+
       const agentes = await db["Usuario"].findAll({
         attributes: ["idUsuario", "nombre"],
         where: {
           rol: "agente",
-          idSupervisor: idSupervisorTarget
-        }
-    });
-  
+          idSupervisor: idSupervisorTarget,
+        },
+      });
+
       if (!agentes.length) {
         return res.status(404).send("No se encontraron agentes");
       }
-  
+
       let activos = 0;
       let inactivos = 0;
-  
-      await Promise.all(agentes.map(async (agente: any) => {
-        const ultimaLlamada = await db["Llamada"].findOne({
-          where: {
-            idUsuario: agente.idUsuario,
-            fechaInicio: {
-              [Op.gte]: today,
-              [Op.lt]: tomorrow
-            }
-          },
-          order: [["fechaInicio", "DESC"]],
-          attributes: ["fechaFin"],
-        });
-        const estaActivo = ultimaLlamada && ultimaLlamada.fechaFin === null;
-        if (estaActivo) {
-          activos++;
-        } else {
-          inactivos++;
-        }
-      }));
-        return res.status(200).json({ activos, inactivos });
+
+      await Promise.all(
+        agentes.map(async (agente: any) => {
+          const ultimaLlamada = await db["Llamada"].findOne({
+            where: {
+              idUsuario: agente.idUsuario,
+              fechaInicio: {
+                [Op.gte]: today,
+                [Op.lt]: tomorrow,
+              },
+            },
+            order: [["fechaInicio", "DESC"]],
+            attributes: ["fechaFin"],
+          });
+          const estaActivo = ultimaLlamada && ultimaLlamada.fechaFin === null;
+          if (estaActivo) {
+            activos++;
+          } else {
+            inactivos++;
+          }
+        })
+      );
+      return res.status(200).json({ activos, inactivos });
     } catch (err) {
       console.error(err);
       res.status(500).send("Error en UsuarioController");
     }
   }
-  
+
   private async updateMetaBySupervisor(req: Request, res: Response) {
-    
     try {
       let { idSupervisor } = req.query;
       let { meta } = req.body;
 
       if (!meta && req.query.meta !== undefined) {
-          meta = req.query.meta;
+        meta = req.query.meta;
       }
 
       if (!idSupervisor && req.query.idSupervisor !== undefined) {
-          idSupervisor = req.query.idSupervisor;
+        idSupervisor = req.query.idSupervisor;
       }
 
       if (!idSupervisor || meta === undefined) {
-          return res.status(400).json({ error: "idSupervisor y meta son requeridos" });
+        return res
+          .status(400)
+          .json({ error: "idSupervisor y meta son requeridos" });
       }
 
-      const [updatedRows] = await db['Usuario'].update(
-          { meta },
-          {
-              where: {
-                  idUsuario: Number(idSupervisor) // Actualización aquí
-              }
-          }
+      const [updatedRows] = await db["Usuario"].update(
+        { meta },
+        {
+          where: {
+            idUsuario: Number(idSupervisor), // Actualización aquí
+          },
+        }
       );
 
       if (updatedRows === 0) {
-          return res.status(404).json({ error: "No se encontraron usuarios con el idUsuario proporcionado" });
+        return res.status(404).json({
+          error: "No se encontraron usuarios con el idUsuario proporcionado",
+        });
       }
 
-      res.status(200).json({ message: "Meta actualizada correctamente para los usuarios", updatedRows });
-  } catch (error) {
+      res.status(200).json({
+        message: "Meta actualizada correctamente para los usuarios",
+        updatedRows,
+      });
+    } catch (error) {
       console.log(error);
       res.status(500).send("Error al actualizar la meta para los usuarios");
+    }
   }
-}
 
+  private async getMetaBySupervisor(req: Request, res: Response) {
+    try {
+      const { idSupervisor } = req.query;
 
-private async getMetaBySupervisor(req: Request, res: Response) {
-  try {
-    const { idSupervisor } = req.query;
-
-    if (!idSupervisor) {
+      if (!idSupervisor) {
         return res.status(400).json({ error: "idSupervisor es requerido" });
-    }
+      }
 
-    const usuarios = await db['Usuario'].findAll({
-        attributes: ['idUsuario', 'nombre', 'meta'],
+      const usuarios = await db["Usuario"].findAll({
+        attributes: ["idUsuario", "nombre", "meta"],
         where: {
-            idUsuario: idSupervisor // Actualización aquí
-        }
-    });
+          idUsuario: idSupervisor, // Actualización aquí
+        },
+      });
 
-    if (usuarios.length === 0) {
-        return res.status(404).json({ error: "No se encontraron usuarios con el idUsuario proporcionado" });
+      if (usuarios.length === 0) {
+        return res.status(404).json({
+          error: "No se encontraron usuarios con el idUsuario proporcionado",
+        });
+      }
+
+      res.status(200).json(usuarios);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error al obtener la meta para los usuarios");
     }
-
-    res.status(200).json(usuarios);
-} catch (error) {
-    console.log(error);
-    res.status(500).send("Error al obtener la meta para los usuarios");
-}
-}
-
+  }
 }
 
 export default UsuarioController;

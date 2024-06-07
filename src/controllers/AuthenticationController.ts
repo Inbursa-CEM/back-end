@@ -44,9 +44,10 @@ class AuthenticationController extends AbstractController {
         res.status(404).send("El usuario no existe");
         return;
       }
-      res.status(200).send({ 
+      res.status(200).send({
         ...login.AuthenticationResult,
-         usuario });
+        usuario,
+      });
     } catch (error: any) {
       res.status(500).send({ code: error.code, message: error.message }).end();
     }

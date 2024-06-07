@@ -56,7 +56,7 @@ class ReporteController extends AbstractController {
 
       // Buscar el reporte por el id del Cliente
       let reporte = await db["Reporte"].findOne({
-        where: { idCliente: id }
+        where: { idCliente: id },
       });
       if (!reporte) {
         return res.status(404).send("Reporte no encontrado");

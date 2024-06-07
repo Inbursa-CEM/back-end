@@ -122,22 +122,22 @@ class LlamadaController extends AbstractController {
   }
 
   // La urlTranscripcion y problemaResuelto se deben mandar por aparte cuando esten listos
-  private async postFinLlamada(req: Request, res: Response){
-    try{
+  private async postFinLlamada(req: Request, res: Response) {
+    try {
       const contactId = req.body.contactId;
-      
-      const newLlamada = await db.Llamada.update({
-        fechaFin: new Date(),
-        sentimiento: req.body.sentimiento
-      },
-        {where: {contactId}}
-      ); 
+
+      const newLlamada = await db.Llamada.update(
+        {
+          fechaFin: new Date(),
+          sentimiento: req.body.sentimiento,
+        },
+        { where: { contactId } }
+      );
 
       res.status(200).json(newLlamada);
       console.log("Llamada actualizada correctamente en la base de datos");
-    }
-    catch(error){
-      res.status(500).json({error: "Error en Llamada Controller"})
+    } catch (error) {
+      res.status(500).json({ error: "Error en Llamada Controller" });
     }
   }
 
@@ -146,8 +146,8 @@ class LlamadaController extends AbstractController {
       const contactId = req.body.contactId;
 
       const resultado = await db.Llamada.update(
-        {problemaResuelto: req.body.problemaResuelto},
-        {where: {contactId}}
+        { problemaResuelto: req.body.problemaResuelto },
+        { where: { contactId } }
       );
 
       if (resultado[0] === 1) {
@@ -173,8 +173,7 @@ class LlamadaController extends AbstractController {
       const resultado = await db.Llamada.update(
         { urlTranscripcion: req.body.urlTranscripcion },
         // { where: { idLlamada } }
-        {where: {contactId}}
-        
+        { where: { contactId } }
       );
 
       if (resultado[0] === 1) {
@@ -186,7 +185,6 @@ class LlamadaController extends AbstractController {
           .status(404)
           .send("No se encontró la llamada con el ID proporcionado");
       }
-
     } catch (error) {
       console.log(error);
       res.status(500).send("Error en Llamada Controller");
@@ -256,7 +254,9 @@ class LlamadaController extends AbstractController {
       let transaccionesConLlamadas = await Promise.all(llamadasPromises);
 
       // Filtrar las transacciones que si tienen llamadas
-      transaccionesConLlamadas = transaccionesConLlamadas.filter(tc => tc.llamadas.length > 0);
+      transaccionesConLlamadas = transaccionesConLlamadas.filter(
+        (tc) => tc.llamadas.length > 0
+      );
 
       // Enviar la respuesta con las transacciones y sus llamadas correspondientes
       res.status(200).json(transaccionesConLlamadas);
@@ -266,27 +266,27 @@ class LlamadaController extends AbstractController {
     }
   }
 
-  private async getTranscripcion(req: Request, res: Response){
-    try{
+  private async getTranscripcion(req: Request, res: Response) {
+    try {
       const contactId = req.params.contactId;
 
-      if (!contactId){
-        return res.status(400).send("Parámetro faltante: contactId")
+      if (!contactId) {
+        return res.status(400).send("Parámetro faltante: contactId");
       }
       const input = {
-        InstanceId: '2f285133-3727-4651-a3c1-ef5237b3839f',
-        ContactId: contactId
+        InstanceId: "2f285133-3727-4651-a3c1-ef5237b3839f",
+        ContactId: contactId,
       };
       console.log("Input parameters:", input);
 
       //Obtener la métricas actualizadas
-      const command =  await connectLens.listRealtimeContactAnalysisSegments(input).promise();
+      const command = await connectLens
+        .listRealtimeContactAnalysisSegments(input)
+        .promise();
       res.status(200).json([command]);
-
-    }catch(err){
+    } catch (err) {
       console.log(err);
       res.status(500).send("Internal server error " + err);
-
     }
 
     this.router.get(
@@ -353,19 +353,25 @@ class LlamadaController extends AbstractController {
   private async getNumLlamadas(req: Request, res: Response) {
     try {
       const idAgente = req.query.idUsuario;
-      const fechaActual = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
+      const fechaActual = await db.sequelize.query(
+        "SELECT CURRENT_DATE AS fecha_actual",
+        { type: db.sequelize.QueryTypes.SELECT }
+      );
       const fecha = fechaActual[0].fecha_actual;
 
       const numLlamadas = await db["Llamada"].count({
         where: {
           idUsuario: idAgente,
           fechaInicio: {
-            [db.Sequelize.Op.between]: [`${fecha} 00:00:00`, `${fecha} 23:59:59`]
-          }
-        }
+            [db.Sequelize.Op.between]: [
+              `${fecha} 00:00:00`,
+              `${fecha} 23:59:59`,
+            ],
+          },
+        },
       });
 
-      res.status(200).json({ "numLlamadas": numLlamadas, "fecha": fecha });
+      res.status(200).json({ numLlamadas: numLlamadas, fecha: fecha });
     } catch (error) {
       console.log(error);
       res.status(500).send("Error en Llamada Controller");
@@ -376,8 +382,16 @@ class LlamadaController extends AbstractController {
     try {
       const telefono = req.params.telefono;
       let fechaActual = new Date();
-      let primerDiaMes = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
-      let ultimoDiaMes = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 1, 0);
+      let primerDiaMes = new Date(
+        fechaActual.getFullYear(),
+        fechaActual.getMonth(),
+        1
+      );
+      let ultimoDiaMes = new Date(
+        fechaActual.getFullYear(),
+        fechaActual.getMonth() + 1,
+        0
+      );
 
       if (!telefono) {
         return res
@@ -429,8 +443,8 @@ class LlamadaController extends AbstractController {
         let llamadas = await db["Llamada"].count({
           where: { idTransaccion: transax.idTransaccion },
           fechaInicio: {
-            [db.Sequelize.Op.between]: [primerDiaMes, ultimoDiaMes]
-          }
+            [db.Sequelize.Op.between]: [primerDiaMes, ultimoDiaMes],
+          },
         });
         return {
           numllamadas: llamadas,

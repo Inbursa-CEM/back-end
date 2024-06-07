@@ -30,7 +30,7 @@ class AuthMiddleware {
       .catch((err) => {
         return res.status(401).send({ message: "Invalid or expired token" });
       });
-  }
+  };
 
   private async validateToken(token: string): Promise<void> {
     const cognitoIdentity = new AWS.CognitoIdentityServiceProvider({

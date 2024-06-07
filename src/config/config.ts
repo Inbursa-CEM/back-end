@@ -1,5 +1,4 @@
-
-import { DB_NAME, DB_PASSWORD, DB_USER, DB_HOST} from "./index";
+import { DB_NAME, DB_PASSWORD, DB_USER, DB_HOST } from "./index";
 
 export default {
   development: {
