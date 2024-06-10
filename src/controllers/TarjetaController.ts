@@ -130,13 +130,13 @@ class TarjetaController extends AbstractController {
 
   private async getTarjetasPorCuenta(req: Request, res: Response) {
     try {
-      const { idCuenta } = req.params;
-      if (!idCuenta) {
-        return res.status(400).send("ID de cuenta es requerido");
-      }
+      const idCuenta = req.body.idCuenta;
 
+      // Buscar todas las tarjetas en la base de datos asociadas al id de la cuenta
       const tarjetas = await db.Tarjeta.findAll({
-        where: { idCuenta },
+        where: {
+          idCuenta: idCuenta,
+        },
       });
 
       res.status(200).json(tarjetas);
