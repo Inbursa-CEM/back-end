@@ -107,6 +107,7 @@ class LlamadaController extends AbstractController {
         problemaResuelto: null,
         idUsuario: req.body.idUsuario,
         idTransaccion: req.body.idTransaccion,
+        nivelSatisfaccion: 4,
         sentimiento: "NEUTRAL",
         tema: "Problema con una transacción",
         motivo: "Quejas y reclamaciones",
