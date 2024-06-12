@@ -11,6 +11,7 @@ interface LlamadaAttributes {
   tema: string;
   motivo: string;
   urlTranscripcion: string;
+  contactId: string;
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
@@ -25,6 +26,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public tema!: string;
     public motivo!: string;
     public urlTranscripcion!: string;
+    public contactId!: string;
 
     static associate(models: any) {
       Llamada.belongsTo(models.Usuario, {
@@ -88,6 +90,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
         allowNull: true,
       },
       urlTranscripcion: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      contactId: {
         type: DataTypes.STRING,
         allowNull: true,
       },

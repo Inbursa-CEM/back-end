@@ -29,6 +29,7 @@ class UsuarioController extends AbstractController {
     this.router.get("/especifico", this.getSpecificAgent.bind(this));
   }
 
+  // Método para obtener la lista de supervisores en la base de datos
   private async getSupervisores(req: Request, res: Response) {
     try {
       console.log("Consultando supervisores");
@@ -67,9 +68,10 @@ class UsuarioController extends AbstractController {
     }
   }
 
+  // Método para obtener la información de un agente específico
   private async getSpecificAgent(req: Request, res: Response) {
     try {
-      const agente = await db.Usuario.findByPk(req.body.idAgente);
+      const agente = await db.Usuario.findByPk(req.query.idAgente);
       res.status(200).json(agente);
     } catch (err) {
       console.log(err);
@@ -77,6 +79,8 @@ class UsuarioController extends AbstractController {
     }
   }
 
+  // Método para obtener la información actual de los agentes
+  // Si están en una llamada, se obtienen los datos de la llamada (duracion, nombre del cliente, saldo del cliente, contactId)
   private async getInfoActualAgentes(req: Request, res: Response) {
     try {
       console.log("Consultando información de angentes");
@@ -87,7 +91,7 @@ class UsuarioController extends AbstractController {
           "nombre",
           [
             db.sequelize.literal(
-              "TIMESTAMPDIFF(SECOND, Llamada.fechaInicio, NOW())"
+              "TIMESTAMPDIFF(SECOND, Llamada.fechaInicio, CONVERT_TZ(NOW(), @@session.time_zone, '-06:00'))"
             ),
             "duracionLlamada",
           ],
@@ -98,7 +102,7 @@ class UsuarioController extends AbstractController {
         },
         include: {
           model: db["Llamada"],
-          attributes: ["fechaFin"],
+          attributes: ["fechaFin", "contactId"],
           as: "Llamada",
           include: {
             model: db["Transaccion"],
@@ -130,6 +134,7 @@ class UsuarioController extends AbstractController {
         let duracion = null;
         let nombreCliente = null;
         let saldoCliente = null;
+        let contactId = null;
         if (agente.Llamada && agente.Llamada.length > 0) {
           const llamada = agente.Llamada[0];
           if (llamada.fechaFin === null) {
@@ -137,6 +142,7 @@ class UsuarioController extends AbstractController {
             nombreCliente =
               llamada.Transaccion?.Tarjeta?.Cuenta?.Cliente?.nombre ?? null;
             saldoCliente = llamada.Transaccion?.Tarjeta?.saldo ?? null;
+            contactId = llamada.contactId ?? null;
           }
         }
         return {
@@ -145,6 +151,7 @@ class UsuarioController extends AbstractController {
           duracion,
           nombreCliente,
           saldoCliente,
+          contactId,
         };
       });
       res.status(200).json(resultado);

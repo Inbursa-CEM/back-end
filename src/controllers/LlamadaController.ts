@@ -1,7 +1,15 @@
 import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
-import { Sequelize, literal } from "sequelize";
+import { Sequelize, Op } from "sequelize";
+// importar connection services
+import connectLens from "../services/connectLensService";
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const tomorrow = new Date(today);
+tomorrow.setDate(today.getDate() + 1);
 
 class LlamadaController extends AbstractController {
   // Singleton
@@ -23,12 +31,7 @@ class LlamadaController extends AbstractController {
     );
 
     // GETS
-    this.router.get(
-      "/promedioDuracionAgente",
-      this.getPromedioDuracionAgente.bind(this)
-    );
-    this.router.get("/numLlamadasAgente", this.getNumLlamadasAgente.bind(this));
-    this.router.get("/satisfaccion", this.getSatisfaccion.bind(this));
+    this.router.get("/consultar/:telefono", this.getConsultar.bind(this));
     this.router.get(
       "/numLlamadasPorAgente",
       this.getnumLlamadasPorAgente.bind(this)
@@ -273,112 +276,71 @@ class LlamadaController extends AbstractController {
     }
   }
 
-  private async getPromedioDuracionAgente(req: Request, res: Response) {
+  private async getvelocidadPromedio(req: Request, res: Response) {
     try {
-      const idAgenteTarget = req.body.idAgente;
-      const currentDate = literal("CURRENT_DATE");
+      const idSupervisorTarget = req.query.idSupervisor;
 
-      const llamadas = await db.Llamada.findAll({
+      if (!idSupervisorTarget) {
+        return res.status(400).send("idSupervisor is required");
+      }
+
+      console.log(
+        "Calculando duración promedio de llamadas de todos los usuarios asociados al supervisor"
+      );
+
+      const llamadas = await db["Llamada"].findAll({
         attributes: ["fechaInicio", "fechaFin"],
-        where: {
-          idAgente: idAgenteTarget,
-          fechaInicio: Sequelize.literal(
-            "DATE(fechaInicio) = DATE(:currentDate)"
-          ),
-        },
-        replacements: { currentDate },
-      });
-
-      const resultado = llamadas.map((llamada: any) => {
-        const duracionMs =
-          new Date(llamada.fechaFin).getTime() -
-          new Date(llamada.fechaInicio).getTime();
-        const duracion = new Date(duracionMs);
-
-        const horas = duracion.getUTCHours().toString().padStart(2, "0");
-        const minutos = duracion.getUTCMinutes().toString().padStart(2, "0");
-        const segundos = duracion.getUTCSeconds().toString().padStart(2, "0");
-
-        const duracionFormateada = `${horas}:${minutos}:${segundos}`;
-
-        return {
-          fechaInicio: llamada.fechaInicio,
-          fechaFin: llamada.fechaFin,
-          duracion: duracionFormateada,
-        };
-      });
-
-      res.status(200).json(resultado);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en Llamada Controller");
-    }
-  }
-
-  private async getNumLlamadasAgente(req: Request, res: Response) {
-    try {
-      const idAgenteTarget = req.body.idAgente;
-      const currentDate = literal("CURRENT_DATE");
-
-      const numLlamadas = await db.Llamada.count({
-        where: {
-          idAgente: idAgenteTarget,
-          fechaInicio: Sequelize.literal(
-            "DATE(fechaInicio) = DATE(:currentDate)"
-          ),
-        },
-        replacements: { currentDate },
-      });
-
-      res.status(200).json(numLlamadas);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en Llamada Controller");
-    }
-  }
-
-  private async getSatisfaccion(req: Request, res: Response) {
-    try {
-      const idAgenteTarget: number = req.body.idAgente;
-      const currentDate = literal("CURRENT_DATE");
-
-      const queryCompleta = await db["Llamada"].findAll({
-        where: {
-          idAgente: idAgenteTarget,
-          fecha: currentDate,
-        },
-        attributes: [
-          [
-            db.sequelize.fn(
-              "SUM",
-              db.sequelize.literal(
-                "CASE WHEN satisfaccion = true THEN 1 ELSE 0 END"
-              )
-            ),
-            "numeroSatisfaccionTrue",
-          ],
-          [
-            db.sequelize.fn(
-              "SUM",
-              db.sequelize.literal(
-                "CASE WHEN satisfaccion = false THEN 1 ELSE 0 END"
-              )
-            ),
-            "numeroSatisfaccionFalse",
-          ],
+        include: [
+          {
+            model: db["Usuario"],
+            attributes: [],
+            as: "Usuario",
+            where: {
+              idSupervisor: idSupervisorTarget,
+            },
+          },
         ],
+        where: {
+          fechaInicio: {
+            [Op.gte]: today,
+            [Op.lt]: tomorrow,
+          },
+        },
       });
 
-      const resultado = {
-        numeroSatisfaccionTrue: queryCompleta[0].get("numeroSatisfaccionTrue"),
-        numeroSatisfaccionFalse: queryCompleta[0].get(
-          "numeroSatisfaccionFalse"
-        ),
-      };
-      res.status(200).json(resultado);
+      console.log(`Llamadas encontradas: ${llamadas.length}`);
+
+      let totalDuracion = 0;
+      let totalLlamadas = 0;
+
+      for (const llamada of llamadas) {
+        const fechaInicio = llamada.fechaInicio
+          ? new Date(llamada.fechaInicio)
+          : null;
+        const fechaFin = llamada.fechaFin ? new Date(llamada.fechaFin) : null;
+
+        if (fechaInicio && fechaFin) {
+          const duracionMs = fechaFin.getTime() - fechaInicio.getTime();
+          totalDuracion += duracionMs;
+          totalLlamadas++;
+        } else {
+          console.log(
+            `Llamada con id ${llamada.id} tiene fechaInicio o fechaFin nulo.`
+          );
+        }
+      }
+
+      if (totalLlamadas === 0) {
+        return res.status(200).json({ tiempoPromedio: 0 });
+      }
+
+      const velocidadPromedio = totalDuracion / totalLlamadas / 60000;
+
+      res.status(200).json({ velocidadPromedio });
+      console.log("Duración promedio de llamadas calculada");
     } catch (error) {
       console.log(error);
-      res.status(500).send("Error en Llamada Controller");
+      res.status(500).send("Error en calcular duración promedio de llamadas");
     }
   }
 }

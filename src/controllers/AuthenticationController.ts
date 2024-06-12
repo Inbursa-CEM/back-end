@@ -37,7 +37,6 @@ class AuthenticationController extends AbstractController {
         attributes: ["idUsuario", "nombre", "rol", "urlFoto"],
         where: {
           correo: email,
-          password: password,
         },
       });
       // if (!usuario || !login.AuthenticationResult) {
@@ -113,12 +112,6 @@ class AuthenticationController extends AbstractController {
         code,
         password
       );
-      if (user) {
-        await db["Usuario"].update(
-          { password: password },
-          { where: { correo: email } }
-        );
-      }
       res.status(200).send({ message: "Password changed" });
     } catch (error: any) {
       res.status(500).send({ code: error.code, message: error.message }).end();

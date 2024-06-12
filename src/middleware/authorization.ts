@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 import AWS from "aws-sdk";
 import { AWS_REGION, COGNITO_POOL_ID } from "../config";
 
