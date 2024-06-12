@@ -174,62 +174,70 @@ class UsuarioController extends AbstractController {
 
   private async getestatusAgente(req: Request, res: Response) {
     try {
+        // Obtiene el id del supervisor del query parameter
+        const idSupervisorTarget = req.query.idSupervisor;
 
-      const idSupervisorTarget = req.query.idSupervisor;
+        console.log("Obteniendo el estado de todos los agentes");
 
-      
+        // Configura el rango de fechas para hoy y mañana
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-      console.log("Obteniendo el estado de todos los agentes");
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
 
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-      
-      const agentes = await db["Usuario"].findAll({
-        attributes: ["idUsuario", "nombre"],
-        where: {
-          rol: "agente",
-          idSupervisor: idSupervisorTarget
-        }
-    });
-  
-      if (!agentes.length) {
-        return res.status(404).send("No se encontraron agentes");
-      }
-  
-      let activos = 0;
-      let inactivos = 0;
-  
-      await Promise.all(agentes.map(async (agente: any) => {
-        const ultimaLlamada = await db["Llamada"].findOne({
-          where: {
-            idUsuario: agente.idUsuario,
-            fechaInicio: {
-              [Op.gte]: today,
-              [Op.lt]: tomorrow
+        // Busca todos los usuarios con rol de agente bajo el supervisor especificado
+        const agentes = await db["Usuario"].findAll({
+            attributes: ["idUsuario", "nombre"], // Solo selecciona idUsuario y nombre
+            where: {
+                rol: "agente",
+                idSupervisor: idSupervisorTarget
             }
-          },
-          order: [["fechaInicio", "DESC"]],
-          attributes: ["fechaFin"],
         });
-        const estaActivo = ultimaLlamada && ultimaLlamada.fechaFin === null;
-        if (estaActivo) {
-          activos++;
-        } else {
-          inactivos++;
+
+        // Si no se encuentran agentes, responde con un estado 404
+        if (!agentes.length) {
+            return res.status(404).send("No se encontraron agentes");
         }
-      }));
+
+        let activos = 0;
+        let inactivos = 0;
+
+        // Itera sobre cada agente y verifica su última llamada
+        await Promise.all(agentes.map(async (agente: any) => {
+            const ultimaLlamada = await db["Llamada"].findOne({
+                where: {
+                    idUsuario: agente.idUsuario,
+                    fechaInicio: {
+                        [Op.gte]: today,
+                        [Op.lt]: tomorrow
+                    }
+                },
+                order: [["fechaInicio", "DESC"]], // Ordena por fechaInicio descendente
+                attributes: ["fechaFin"],
+            });
+            // Verifica si el agente está activo (si la última llamada aún no ha terminado)
+            const estaActivo = ultimaLlamada && ultimaLlamada.fechaFin === null;
+            if (estaActivo) {
+                activos++;
+            } else {
+                inactivos++;
+            }
+        }));
+
+        // Responde con el conteo de agentes activos e inactivos
         return res.status(200).json({ activos, inactivos });
     } catch (err) {
-      console.error(err);
-      res.status(500).send("Error en UsuarioController");
+        console.error(err);
+        // En caso de error, responde con un estado 500
+        res.status(500).send("Error en UsuarioController");
     }
-  }
+}
+
   
-  private async updateMetaBySupervisor(req: Request, res: Response) {
-    
-    try {
+private async updateMetaBySupervisor(req: Request, res: Response) {
+  try {
+      // Obtiene idSupervisor y meta del query o del body de la solicitud
       let { idSupervisor } = req.query;
       let { meta } = req.body;
 
@@ -241,56 +249,69 @@ class UsuarioController extends AbstractController {
           idSupervisor = req.query.idSupervisor;
       }
 
+      // Verifica si idSupervisor y meta están presentes
       if (!idSupervisor || meta === undefined) {
           return res.status(400).json({ error: "idSupervisor y meta son requeridos" });
       }
 
+      // Actualiza la meta de los usuarios supervisados por el idSupervisor
       const [updatedRows] = await db['Usuario'].update(
           { meta },
           {
               where: {
-                  idUsuario: Number(idSupervisor) // Actualización aquí
+                  idUsuario: Number(idSupervisor) // Filtra por idUsuario del supervisor
               }
           }
       );
 
+      // Verifica si se actualizaron filas
       if (updatedRows === 0) {
           return res.status(404).json({ error: "No se encontraron usuarios con el idUsuario proporcionado" });
       }
 
+      // Responde con el número de filas actualizadas
       res.status(200).json({ message: "Meta actualizada correctamente para los usuarios", updatedRows });
   } catch (error) {
       console.log(error);
+      // En caso de error, responde con un estado 500
       res.status(500).send("Error al actualizar la meta para los usuarios");
   }
 }
 
 
+
 private async getMetaBySupervisor(req: Request, res: Response) {
   try {
-    const { idSupervisor } = req.query;
+      // Obtiene idSupervisor del query parameter
+      const { idSupervisor } = req.query;
 
-    if (!idSupervisor) {
-        return res.status(400).json({ error: "idSupervisor es requerido" });
-    }
+      // Verifica si idSupervisor está presente
+      if (!idSupervisor) {
+          return res.status(400).json({ error: "idSupervisor es requerido" });
+      }
 
-    const usuarios = await db['Usuario'].findAll({
-        attributes: ['idUsuario', 'nombre', 'meta'],
-        where: {
-            idUsuario: idSupervisor // Actualización aquí
-        }
-    });
+      // Busca todos los usuarios bajo el supervisor especificado
+      const usuarios = await db['Usuario'].findAll({
+          attributes: ['idUsuario', 'nombre', 'meta'], // Selecciona idUsuario, nombre y meta
+          where: {
+              idUsuario: idSupervisor // Filtra por idUsuario del supervisor
+          }
+      });
 
-    if (usuarios.length === 0) {
-        return res.status(404).json({ error: "No se encontraron usuarios con el idUsuario proporcionado" });
-    }
+      // Si no se encuentran usuarios, responde con un estado 404
+      if (usuarios.length === 0) {
+          return res.status(404).json({ error: "No se encontraron usuarios con el idUsuario proporcionado" });
+      }
 
-    res.status(200).json(usuarios);
-} catch (error) {
-    console.log(error);
-    res.status(500).send("Error al obtener la meta para los usuarios");
+      // Responde con los datos de los usuarios encontrados
+      res.status(200).json(usuarios);
+  } catch (error) {
+      console.log(error);
+      // En caso de error, responde con un estado 500
+      res.status(500).send("Error al obtener la meta para los usuarios");
+  }
 }
-}
+
 
 }
 
