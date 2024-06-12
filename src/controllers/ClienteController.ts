@@ -41,10 +41,12 @@ class ClienteController extends AbstractController {
     }
   }
 
+  // Método para obtener los datos del cliente
   private async getDatosCliente(req: Request, res: Response) {
     try {
       const correo = req.body.correo;
       const password = req.body.password;
+      // Buscar un cliente en la base de datos con el correo y la contraseña proporcionados
       const cliente = await db.Cliente.findOne({
         attributes: ["idCliente", "nombre", "correo"],
         where: {
@@ -53,13 +55,14 @@ class ClienteController extends AbstractController {
         },
       });
 
+      // Si no se encuentra ningún cliente, enviar un error 404
       if (!cliente) {
         res.status(404).send("Cliente no encontrado");
         return;
       }
 
       console.log("Se inició sesión con cliente");
-      res.status(200).json(cliente);
+      res.status(200).json(cliente); // Devolver los datos del cliente en la respuesta
     } catch (error) {
       console.log(error);
       res.status(500).send("Error en Cliente login");
