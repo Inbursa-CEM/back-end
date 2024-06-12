@@ -139,7 +139,6 @@ class UsuarioController extends AbstractController {
         let duracion = null;
         let nombreCliente = null;
         let saldoCliente = null;
-        let contactId = null;
         if (agente.Llamada && agente.Llamada.length > 0) {
           const llamada = agente.Llamada[0];
           if (llamada.fechaFin === null) {

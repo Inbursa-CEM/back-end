@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import AbstractController from "./AbstractController";
 import db from "../models";
-import { Sequelize, literal, Op, where } from "sequelize";
+import { Sequelize, Op } from "sequelize";
 // importar connection services
 import connectLens from "../services/connectLensService";
 
