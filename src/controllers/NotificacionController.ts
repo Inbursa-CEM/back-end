@@ -64,6 +64,7 @@ class NotificacionController extends AbstractController {
     }
   }
 
+  // Controller que envía una notificación de 1:1 a un usuario específico
   private async postMandarOneonOne(req: Request, res: Response) {
     try {
       const { idUsuario, contenido } = req.body;
@@ -112,6 +113,7 @@ class NotificacionController extends AbstractController {
     }
   }
 
+  // Controller que obtiene las notificaciones incompletas de un usuario o todas las notificaciones
   private async getObtenerNotificaciones(req: Request, res: Response) {
     try {
       const idUsuario = req.params.idUsuario;
@@ -130,6 +132,7 @@ class NotificacionController extends AbstractController {
     }
   }
 
+  // Controller que actualiza el status de una notificación a completada
   private async putActualizarStatusNotificacion(req: Request, res: Response) {
     try {
       const idNotificacion = req.query.idNotificacion;
