@@ -20,11 +20,20 @@ class AreaOportunidadController extends AbstractController {
 
     // GETS
     this.router.get("/all", this.getAll.bind(this));
-    this.router.get("/cursosDeArea", this.getCursosDeArea.bind(this));
-    this.router.get("/agentesConArea", this.getAgentesConArea.bind(this));
     this.router.get("/especifica", this.getSpecificArea.bind(this));
   }
 
+
+  /**
+   * POST -> Crear nueva área de oportunidad
+   * ENDPOINT -> areaOportunidad/crear
+   * 
+   * PARAMETROS DE REQUEST:
+   * - nombre
+   * 
+   * SIN DATOS EN RESPONSE
+   * 
+   */
   private async postCrear(req: Request, res: Response) {
     try {
       await db.AreaOportunidad.create(req.body);
@@ -36,6 +45,21 @@ class AreaOportunidadController extends AbstractController {
     }
   }
 
+  
+  /**
+   * GET -> Obtener todas las áreas de oportunidad existentes
+   * ENDPOINT -> areaOportunidad/all
+   * 
+   * NO PARAMETROS EN REQUEST
+   * 
+   * RESPONSE:
+   * Lista con:
+   * - idArea
+   * - nombre 
+   * de todas las áreas
+   * 
+   * 
+   */
   private async getAll(req: Request, res: Response) {
     try {
       console.log("Obteniendo todas las áreas de oportunidad");
@@ -47,16 +71,20 @@ class AreaOportunidadController extends AbstractController {
     }
   }
 
-  private async getCursosDeArea(req: Request, res: Response) {
-    try {
-    } catch (err) {}
-  }
-
-  private async getAgentesConArea(req: Request, res: Response) {
-    try {
-    } catch (err) {}
-  }
-
+  
+  /**
+   * GET -> Obtener toda la información de una área de oportunidad
+   * ENDPOINT -> areaOportunidad/especifica
+   * 
+   * PARAMETROS DE REQUEST:
+   * - idArea
+   * 
+   * RESPONSE:
+   * - idArea
+   * - nombre
+   * 
+   * 
+   */
   private async getSpecificArea(req: Request, res: Response) {
     try {
       const area = await db.AreaOportunidad.findByPk(req.body.idArea);

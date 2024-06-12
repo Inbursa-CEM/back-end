@@ -17,7 +17,6 @@ class CursoController extends AbstractController {
   protected initializeRoutes(): void {
     // POSTS
     this.router.post("/crear", this.postCrear.bind(this));
-    this.router.post("/cambiarEstado", this.postCambiarEstado.bind(this));
     this.router.post("/asignar", this.postAsignarCurso.bind(this));
     this.router.post("/desasignar", this.postDesasignarCurso.bind(this));
     this.router.post(
@@ -26,13 +25,26 @@ class CursoController extends AbstractController {
     );
 
     // GETS
-    this.router.get("/infoCompleta", this.getInfoCompleta.bind(this));
-    this.router.get("/agentesConCurso", this.getAgentesConCurso.bind(this));
     this.router.get("/asignados", this.GetAllByAgente.bind(this));
     this.router.get("/porArea", this.GetAllByArea.bind(this));
     this.router.get("/especifico", this.getSpecificCurso.bind(this));
   }
 
+  
+  /**
+   * POST -> Crear un nuevo curso
+   * ENDPOINT -> curso/crear
+   * 
+   * PARAMETROS DE REQUEST:
+   * - nombre
+   * - descripcion
+   * - url
+   * - idAreasOportunidad[]
+   * 
+   * SIN DATOS EN RESPONSE
+   * 
+   * 
+   */
   private async postCrear(req: Request, res: Response) {
     try {
       const newCurso = await db.Curso.create(req.body);
@@ -48,6 +60,27 @@ class CursoController extends AbstractController {
     }
   }
 
+  
+  /**
+   * GET -> Obtener cursos asignados a un agente
+   * ENDPOINT -> curso/asignados
+   * 
+   * PARAMETROS DE REQUEST:
+   * - idAgente
+   * 
+   * RESPONSE:
+   * Lista con:
+   * - idCurso
+   * - nombre
+   * - url
+   * - descripcion
+   * - prioridad
+   * - estado
+   * - fecha 
+   * de todos los cursos asignados a ese agente
+   * 
+   * 
+   */
   private async GetAllByAgente(req: Request, res: Response) {
     try {
       const idAgenteTarget = req.query.idAgente;
@@ -87,6 +120,23 @@ class CursoController extends AbstractController {
     }
   }
 
+  /**
+   * GET -> Obtener todos los cursos de una área en específico
+   * ENDPOINT -> curso/porArea
+   * 
+   * PARAMETROS DE REQUEST:
+   * - idArea
+   * 
+   * RESPONSE:
+   * Lista con:
+   * - idCurso
+   * - nombre
+   * - url
+   * - descripcion
+   * de todos los cursos pertenecientes a esa área
+   * 
+   * 
+   */
   private async GetAllByArea(req: Request, res: Response) {
     try {
       const idAreaTarget = req.query.idArea;
@@ -120,6 +170,21 @@ class CursoController extends AbstractController {
     }
   }
 
+  /**
+   * GET -> Obtener toda la información de un curso
+   * ENDPOINT -> curso/especifico
+   * 
+   * PARAMETROS DE REQUEST:
+   * - idCurso
+   * 
+   * RESPONSE:
+   * - idCurso
+   * - nombre
+   * - url
+   * - descripcion
+   * 
+   * 
+   */
   private async getSpecificCurso(req: Request, res: Response) {
     try {
       const curso = await db.Curso.findByPk(req.body.idCurso);
@@ -130,6 +195,18 @@ class CursoController extends AbstractController {
     }
   }
 
+  /**
+   * POST -> Asignar un curso a un agente
+   * ENDPOINT -> curso/asignar
+   * 
+   * PARAMETROS DE REQUEST:
+   * - idUsuario
+   * - idCurso
+   * 
+   * SIN DATOS EN RESPONSE
+   * 
+   * 
+   */
   private async postAsignarCurso(req: Request, res: Response) {
     try {
       const asignacion = await db.UsuarioCurso.create(req.body);
@@ -142,6 +219,18 @@ class CursoController extends AbstractController {
     }
   }
 
+  /**
+   * POST -> Desasignarle un curso a un agente
+   * ENDPOINT -> curso/desasignar
+   * 
+   * PARAMETROS DE REQUEST:
+   * - idAgente
+   * - idCurso
+   * 
+   * SIN DATOS EN RESPONSE
+   * 
+   * 
+   */
   private async postDesasignarCurso(req: Request, res: Response) {
     try {
       const desasignacion = await db.UsuarioCurso.destroy({
@@ -159,6 +248,21 @@ class CursoController extends AbstractController {
     }
   }
 
+  /**
+   * POST -> Modificar asignación de un curso de un agente
+   * ENDPOINT -> curso/modificarAsignacion
+   * 
+   * PARAMETROS DE REQUEST:
+   * - idAgente
+   * - idCurso
+   * - newPrioridad
+   * - newEstado
+   * - newFecha"
+   * 
+   * SIN DATOS EN RESPONSE
+   * 
+   * 
+   */
   private async postModificarAsignacion(req: Request, res: Response) {
     try {
       const newAsignacion = await db.UsuarioCurso.update(
@@ -183,20 +287,7 @@ class CursoController extends AbstractController {
     }
   }
 
-  private async postCambiarEstado(req: Request, res: Response) {
-    try {
-    } catch (err) {}
-  }
-
-  private async getInfoCompleta(req: Request, res: Response) {
-    try {
-    } catch (err) {}
-  }
-
-  private async getAgentesConCurso(req: Request, res: Response) {
-    try {
-    } catch (err) {}
-  }
+  
 }
 
 export default CursoController;

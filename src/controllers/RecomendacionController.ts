@@ -21,18 +21,6 @@ class RecomendacionController extends AbstractController {
     this.router.post("/desasignar", this.postDesasignarReco.bind(this));
 
     // GETS
-    this.router.get(
-      "/agentesConRecomendacion",
-      this.getAgentesConRecomendacion.bind(this)
-    );
-    this.router.get(
-      "/cursosConRecomendacion",
-      this.getCursosConRecomendacion.bind(this)
-    );
-    this.router.get(
-      "/cambiarEstadoRecomendacion",
-      this.getCambiarEstadoRecomendacion.bind(this)
-    );
     this.router.get("/asignadas", this.GetAllByAgente.bind(this));
     this.router.get("/porArea", this.GetAllByArea.bind(this));
     this.router.get("/especifica", this.getSpecificRecomendacion.bind(this));
@@ -80,21 +68,6 @@ class RecomendacionController extends AbstractController {
       console.log(err);
       res.status(500).send("Error en Recomendacion Controller");
     }
-  }
-
-  private async getAgentesConRecomendacion(req: Request, res: Response) {
-    try {
-    } catch (err) {}
-  }
-
-  private async getCursosConRecomendacion(req: Request, res: Response) {
-    try {
-    } catch (err) {}
-  }
-
-  private async getCambiarEstadoRecomendacion(req: Request, res: Response) {
-    try {
-    } catch (err) {}
   }
 
   private async GetAllByAgente(req: Request, res: Response) {
