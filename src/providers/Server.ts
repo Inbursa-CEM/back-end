@@ -22,6 +22,9 @@ class Server {
   }
 
   private loadRoutes(controllers: AbstractController[]) {
+    this.app.get("/", (req, res) => {
+      res.send("Prueba de estado");
+    });
     controllers.forEach((controller) => {
       this.app.use(`/${controller.prefix}`, controller.router);
     });
