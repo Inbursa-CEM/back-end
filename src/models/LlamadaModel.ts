@@ -13,6 +13,7 @@ interface LlamadaAttributes {
   motivo: string;
   urlTranscripcion: string;
   contactId: string;
+  contactId: string;
 }
 
 module.exports = (sequelize: any, DataTypes: any) => {
@@ -28,6 +29,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
     public tema!: string;
     public motivo!: string;
     public urlTranscripcion!: string;
+    public contactId!: string;
     public contactId!: string;
 
     static associate(models: any) {
@@ -101,7 +103,7 @@ module.exports = (sequelize: any, DataTypes: any) => {
       },
       contactId: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
     },
     {

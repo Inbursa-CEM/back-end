@@ -2,11 +2,9 @@ import { Model } from "sequelize";
 
 interface UsuarioAttributes {
   idUsuario: number;
-  idConnect: string;
   nombre: string;
   telefono: number;
   correo: string;
-  password: string;
   idSupervisor: number;
   departamento: string;
   urlFoto: string;
@@ -17,11 +15,9 @@ interface UsuarioAttributes {
 module.exports = (sequelize: any, DataTypes: any) => {
   class Usuario extends Model<UsuarioAttributes> implements UsuarioAttributes {
     public idUsuario!: number;
-    public idConnect!: string;
     public nombre!: string;
     public telefono!: number;
     public correo!: string;
-    public password!: string;
     public idSupervisor!: number;
     public departamento!: string;
     public urlFoto!: string;
@@ -64,10 +60,6 @@ module.exports = (sequelize: any, DataTypes: any) => {
         primaryKey: true,
         allowNull: false,
       },
-      idConnect: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
       nombre: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -77,10 +69,6 @@ module.exports = (sequelize: any, DataTypes: any) => {
         allowNull: false,
       },
       correo: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      password: {
         type: DataTypes.STRING,
         allowNull: false,
       },

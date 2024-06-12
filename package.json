@@ -31,7 +31,6 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.5",
-    "mongoose": "^8.3.2",
     "mysql2": "^3.9.7",
     "sequelize": "^6.37.3",
     "typescript": "^5.4.5"
