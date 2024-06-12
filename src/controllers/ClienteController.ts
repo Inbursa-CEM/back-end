@@ -3,11 +3,6 @@ import AbstractController from "./AbstractController";
 import db from "../models";
 import jwt from "jsonwebtoken";
 
-// Interfaz que extiende la Request de Express para incluir información del usuario autenticado
-interface AuthenticatedRequest extends Request {
-  user?: { id: number };
-}
-
 // Clase ClienteController que extiende de AbstractController
 class ClienteController extends AbstractController {
   private static _instance: ClienteController;
@@ -24,20 +19,6 @@ class ClienteController extends AbstractController {
   // Método para inicializar las rutas del controlador
   protected initializeRoutes(): void {
     this.router.post("/getDatosCliente", this.getDatosCliente.bind(this));
-    
-    // Rutas comentadas que podrían habilitarse en el futuro
-    // this.router.post("/cargarClientes", this.cargarClientes.bind(this));
-    // this.router.get("/login", this.login.bind(this));
-
-    this.router.get("/perfil", this.authenticateJWT.bind(this),
-      // Ruta comentada para obtener el perfil del cliente
-      // this.getPerfil.bind(this)
-    );
-
-    this.router.get("/logout", this.authenticateJWT.bind(this),
-      // Ruta comentada para cerrar sesión
-      // this.logout.bind(this)
-    );
   }
 
   // Método para obtener los datos del cliente
@@ -66,29 +47,6 @@ class ClienteController extends AbstractController {
     } catch (error) {
       console.log(error); // Log del error
       res.status(500).send("Error en Cliente login"); // Enviar un error 500 si algo falla
-    }
-  }
-
-  // Middleware para autenticar JWT
-  private authenticateJWT(
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) {
-    const token = req.headers.authorization?.split(" ")[1]; // Obtener el token de la cabecera de autorización
-
-    // Si no hay token, enviar un error 401
-    if (!token) {
-      return res.status(401).send("Acceso denegado. Token no proporcionado.");
-    }
-
-    try {
-      // Verificar el token usando la clave secreta
-      const decoded = jwt.verify(token, "secret_key") as { id: number };
-      req.user = decoded; // Añadir la información del usuario al objeto request
-      next(); // Llamar a la siguiente función en la cadena de middleware
-    } catch (err) {
-      res.status(401).send("Token no válido."); // Enviar un error 401 si el token no es válido
     }
   }
 }

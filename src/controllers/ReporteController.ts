@@ -20,7 +20,6 @@ class ReporteController extends AbstractController {
 
   private async postReporte(req: Request, res: Response) {
     try {
-
       const reporte = await db.Reporte.create(req.body);
       res.status(200).send(reporte);
     } catch (err) {
