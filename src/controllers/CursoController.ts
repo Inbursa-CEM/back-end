@@ -17,7 +17,6 @@ class CursoController extends AbstractController {
   protected initializeRoutes(): void {
     // POSTS
     this.router.post("/crear", this.postCrear.bind(this));
-    this.router.post("/cambiarEstado", this.postCambiarEstado.bind(this));
     this.router.post("/asignar", this.postAsignarCurso.bind(this));
     this.router.post("/desasignar", this.postDesasignarCurso.bind(this));
     this.router.post(
@@ -26,8 +25,6 @@ class CursoController extends AbstractController {
     );
 
     // GETS
-    this.router.get("/infoCompleta", this.getInfoCompleta.bind(this));
-    this.router.get("/agentesConCurso", this.getAgentesConCurso.bind(this));
     this.router.get("/asignados", this.GetAllByAgente.bind(this));
     this.router.get("/porArea", this.GetAllByArea.bind(this));
     this.router.get("/especifico", this.getSpecificCurso.bind(this));
@@ -291,20 +288,6 @@ class CursoController extends AbstractController {
   }
 
   
-  private async postCambiarEstado(req: Request, res: Response) {
-    try {
-    } catch (err) {}
-  }
-
-  private async getInfoCompleta(req: Request, res: Response) {
-    try {
-    } catch (err) {}
-  }
-
-  private async getAgentesConCurso(req: Request, res: Response) {
-    try {
-    } catch (err) {}
-  }
 }
 
 export default CursoController;
