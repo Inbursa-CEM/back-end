@@ -101,7 +101,7 @@ class UsuarioController extends AbstractController {
           [
             // Calcula la duración de la llamada actual en segundos
             db.sequelize.literal(
-              "TIMESTAMPDIFF(SECOND, Llamada.fechaInicio, CONVERT_TZ(NOW(), @@session.time_zone, '-06:00'))"
+              "TIMESTAMPDIFF(SECOND, Llamada.fechaInicio, NOW())"
             ),
             "duracionLlamada",
           ],
