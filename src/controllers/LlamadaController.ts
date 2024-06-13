@@ -4,6 +4,9 @@ import db from "../models";
 import { Sequelize, Op } from "sequelize";
 // importar connection services
 import connectLens from "../services/connectLensService";
+import {
+  AWS_INSTANCE
+} from "../config/index";
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -29,9 +32,14 @@ class LlamadaController extends AbstractController {
       "/contestaSatisfaccion",
       this.postContestaSatisfaccion.bind(this)
     );
-    this.router.post("/inicioLlamada", this.postInicioLlamada.bind(this));
 
-    this.router.post("/finLlamada", this.postFinLlamada.bind(this));
+    this.router.post(
+      "/inicioLlamada", 
+      this.postInicioLlamada.bind(this));
+
+    this.router.post(
+      "/finLlamada", 
+      this.postFinLlamada.bind(this));
 
     this.router.post(
       "/constestaProblemaResuelto",
@@ -49,54 +57,73 @@ class LlamadaController extends AbstractController {
       "/numLlamadasPorAgente",
       this.getnumLlamadasPorAgente.bind(this)
     );
+
     this.router.get(
       "/promedioServicioPorAgente",
       this.getpromedioServicioPorAgente.bind(this)
     );
+
     this.router.get(
       "/sentimientoPorAgente",
       this.getSentimientoPorAgente.bind(this)
     );
+
     this.router.get(
       "/reportesAtendidosPorAgente",
       this.getreportesAtendidosPorAgente.bind(this)
     );
+
     this.router.get(
       "/numLlamadasTotales",
       this.getnumLlamadasTotales.bind(this)
     );
+
     this.router.get(
       "/promedioDuracionPorAgente",
       this.getpromedioDuracionPorAgente.bind(this)
     );
-    this.router.get("/velocidadPromedio", this.getvelocidadPromedio.bind(this));
+
+    this.router.get(
+      "/velocidadPromedio", 
+      this.getvelocidadPromedio.bind(this)
+    );
+
     this.router.get(
       "/promedioServicioGeneral",
       this.getpromedioServicioGeneral.bind(this)
     );
 
-    this.router.get("/promedioDuracion", this.getPromedioDuracion.bind(this));
-    this.router.get("/numLlamadas", this.getNumLlamadas.bind(this));
+    this.router.get(
+      "/promedioDuracion", 
+      this.getPromedioDuracion.bind(this)
+    );
+
+    this.router.get(
+      "/numLlamadas", 
+      this.getNumLlamadas.bind(this)
+    );
+
     this.router.get(
       "/numLlamadasCliente/:telefono",
       this.getNumLlamadasCliente.bind(this)
     );
+
     this.router.get(
       "/problemasResueltos",
       this.getProblemasResueltos.bind(this)
     );
-    // Para obtener la transcripcion requerimos como parámetro contactId
+
     this.router.get(
       "/transcripcion/:contactId",
       this.getTranscripcion.bind(this)
     );
   }
 
-  // Necesito regresar el id de la llamada para despues hacer los updates o podemos hacerlo con el contactId
   private async postInicioLlamada(req: Request, res: Response) {
     try {
+      //Crear una nueva llamada en la bd
       const newLlamada = await db.Llamada.create({
-        fechaInicio: new Date(),
+        fechaInicio: new Date().toLocaleDateString("es-MX"),
         fechaFin: null,
         problemaResuelto: null,
         idUsuario: req.body.idUsuario,
@@ -116,16 +143,16 @@ class LlamadaController extends AbstractController {
     }
   }
 
-  // La urlTranscripcion y problemaResuelto se deben mandar por aparte cuando esten listos
   private async postFinLlamada(req: Request, res: Response) {
     try {
+      //Actualizar la llamada para registrar su fin
       const contactId = req.body.contactId;
-
       const newLlamada = await db.Llamada.update(
         {
-          fechaFin: new Date(),
+          fechaFin: new Date().toLocaleDateString("es-MX"),
           sentimiento: req.body.sentimiento,
         },
+        //Se busca con ayuda del contact id
         { where: { contactId } }
       );
 
@@ -138,10 +165,11 @@ class LlamadaController extends AbstractController {
 
   private async postProblemaResuelto(req: Request, res: Response) {
     try {
+      //Actualizar si el valor fue o no resuelto
       const contactId = req.body.contactId;
-
       const resultado = await db.Llamada.update(
         { problemaResuelto: req.body.problemaResuelto },
+        //Se busca con ayuda del contact id
         { where: { contactId } }
       );
 
@@ -162,12 +190,11 @@ class LlamadaController extends AbstractController {
 
   private async postUrlTranscripcion(req: Request, res: Response) {
     try {
-      // const idLlamada = req.body.idLlamada;
+      //Actualiza el url de la transcripción 
       const contactId = req.body.contactId;
-
       const resultado = await db.Llamada.update(
         { urlTranscripcion: req.body.urlTranscripcion },
-        // { where: { idLlamada } }
+        //Se busca con ayuda del contact id
         { where: { contactId } }
       );
 
@@ -263,13 +290,14 @@ class LlamadaController extends AbstractController {
 
   private async getTranscripcion(req: Request, res: Response) {
     try {
+      //Solicitamos el análisis de la transcripción en tiempo real
       const contactId = req.params.contactId;
 
       if (!contactId) {
         return res.status(400).send("Parámetro faltante: contactId");
       }
       const input = {
-        InstanceId: "2f285133-3727-4651-a3c1-ef5237b3839f",
+        InstanceId: AWS_INSTANCE,
         ContactId: contactId,
       };
       console.log("Input parameters:", input);
@@ -293,54 +321,53 @@ class LlamadaController extends AbstractController {
   //llamada/problemasResueltos?idUsuario=2
   private async getProblemasResueltos(req: Request, res: Response) {
     try {
-      const idAgente = req.query.idUsuario;
-      const fechaActual = await db.sequelize.query(
-        "SELECT CURRENT_DATE AS fecha_actual",
-        { type: db.sequelize.QueryTypes.SELECT }
-      );
-      const fecha = fechaActual[0].fecha_actual;
+        const idAgente = req.query.idUsuario;
+        const fechaActual = new Date().toLocaleDateString("es-MX"); // Obtener la fecha actual en formato es-MX
 
-      const queryCompleta = await db["Llamada"].findAll({
-        where: {
-          idUsuario: idAgente,
-          fechaInicio: {
-            [db.Sequelize.Op.between]: [
-              `${fecha} 00:00:00`,
-              `${fecha} 23:59:59`,
+        // Construir las fechas de inicio y fin del día
+        const fechaInicio = `${fechaActual} 00:00:00`;
+        const fechaFin = `${fechaActual} 23:59:59`;
+
+        // Se obtienen el número de problemas resueltos de la llamada por el id de Agente y la fecha actual
+        const queryCompleta = await db["Llamada"].findAll({
+            where: {
+                idUsuario: idAgente,
+                fechaInicio: {
+                    [db.Sequelize.Op.between]: [fechaInicio, fechaFin],
+                },
+            },
+            attributes: [
+                [
+                    db.sequelize.fn(
+                        "SUM",
+                        db.sequelize.literal(
+                            "CASE WHEN problemaResuelto = 0 THEN 1 ELSE 0 END"
+                        )
+                    ),
+                    "problemaNoResuelto",
+                ],
+                [
+                    db.sequelize.fn(
+                        "SUM",
+                        db.sequelize.literal(
+                            "CASE WHEN problemaResuelto = 1 THEN 1 ELSE 0 END"
+                        )
+                    ),
+                    "problemaResuelto",
+                ],
             ],
-          },
-        },
-        attributes: [
-          [
-            db.sequelize.fn(
-              "SUM",
-              db.sequelize.literal(
-                "CASE WHEN problemaResuelto = 0 THEN 1 ELSE 0 END"
-              )
-            ),
-            "problemaNoResuelto",
-          ],
-          [
-            db.sequelize.fn(
-              "SUM",
-              db.sequelize.literal(
-                "CASE WHEN problemaResuelto = 1 THEN 1 ELSE 0 END"
-              )
-            ),
-            "problemaResuelto",
-          ],
-        ],
-      });
+        });
 
-      const resultado = {
-        problemaResuelto: queryCompleta[0].get("problemaResuelto"),
-        problemaNoResuelto: queryCompleta[0].get("problemaNoResuelto"),
-        fecha: fecha,
-      };
-      res.status(200).json(resultado);
+        // Se hace el cálculo de las llamadas que sí resolvieron el problema y las que no
+        const resultado = {
+            problemaResuelto: queryCompleta[0].get("problemaResuelto"),
+            problemaNoResuelto: queryCompleta[0].get("problemaNoResuelto"),
+            fecha: fechaActual, // Mantener la fecha actual en el resultado
+        };
+        res.status(200).json(resultado);
     } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en Llamada Controller");
+        console.log(error);
+        res.status(500).send("Error en Llamada Controller");
     }
   }
 
@@ -348,25 +375,22 @@ class LlamadaController extends AbstractController {
   private async getNumLlamadas(req: Request, res: Response) {
     try {
       const idAgente = req.query.idUsuario;
-      const fechaActual = await db.sequelize.query(
-        "SELECT CURRENT_DATE AS fecha_actual",
-        { type: db.sequelize.QueryTypes.SELECT }
-      );
-      const fecha = fechaActual[0].fecha_actual;
+      const fechaActual = new Date().toLocaleDateString("es-MX"); // Obtener la fecha actual en formato es-MX
+
+      // Construir las fechas de inicio y fin del día
+      const fechaInicio = `${fechaActual} 00:00:00`;
+      const fechaFin = `${fechaActual} 23:59:59`;
 
       const numLlamadas = await db["Llamada"].count({
         where: {
           idUsuario: idAgente,
           fechaInicio: {
-            [db.Sequelize.Op.between]: [
-              `${fecha} 00:00:00`,
-              `${fecha} 23:59:59`,
-            ],
-          },
+            [db.Sequelize.Op.between]: [fechaInicio, fechaFin],
+        },
         },
       });
 
-      res.status(200).json({ numLlamadas: numLlamadas, fecha: fecha });
+      res.status(200).json({ numLlamadas: numLlamadas, fecha: fechaActual });
     } catch (error) {
       console.log(error);
       res.status(500).send("Error en Llamada Controller");
@@ -458,11 +482,11 @@ class LlamadaController extends AbstractController {
   //llamada/promedioDuracion?idUsuario=2
   private async getPromedioDuracion(req: Request, res: Response) {
     const usuario = req.query.idUsuario;
-    const fechaActual = await db.sequelize.query(
-      "SELECT CURRENT_DATE AS fecha_actual",
-      { type: db.sequelize.QueryTypes.SELECT }
-    );
-    const fecha = fechaActual[0].fecha_actual;
+    const fechaActual = new Date().toLocaleDateString("es-MX"); // Obtener la fecha actual en formato es-MX
+
+    // Construir las fechas de inicio y fin del día
+    const fechaInicio = `${fechaActual} 00:00:00`;
+    const fechaFin = `${fechaActual} 23:59:59`;
 
     try {
       const duraciones = await db["Llamada"].findAll({
@@ -473,11 +497,8 @@ class LlamadaController extends AbstractController {
         where: {
           idUsuario: usuario,
           fechaInicio: {
-            [db.Sequelize.Op.between]: [
-              `${fecha} 00:00:00`,
-              `${fecha} 23:59:59`,
-            ],
-          },
+            [db.Sequelize.Op.between]: [fechaInicio, fechaFin],
+        },
         },
       });
 
@@ -505,7 +526,7 @@ class LlamadaController extends AbstractController {
 
       res
         .status(200)
-        .json({ promedioDuracion: promedioDuracion, fecha: fecha });
+        .json({ promedioDuracion: promedioDuracion, fecha: fechaActual });
     } catch (error) {
       console.log(error);
       res.status(500).send("Error en Llamada Controller");

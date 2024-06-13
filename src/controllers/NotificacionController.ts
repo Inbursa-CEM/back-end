@@ -54,7 +54,7 @@ class NotificacionController extends AbstractController {
         idUsuario: req.body.idUsuario,
         contenido: req.body.contenido,
         fechaHora: new Date(),
-        completada: true,
+        completada: false,
       });
       console.log("Notificación enviada");
       res.status(200).json(newSolicitudAyuda);
@@ -94,18 +94,12 @@ class NotificacionController extends AbstractController {
   private async getObtenerSolicitudAyuda(req: Request, res: Response) {
     try {
       const idUsuario = req.query.idUsuario;
-      // const fechaActual = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
-      // const fecha = fechaActual[0].fecha_actual;
 
       const solicitudAyuda = await db["Notificacion"].findAll({
         where: {
           idUsuario: idUsuario,
-          // fechaHora: {
-          //   [db.Sequelize.Op.between]: [`${fecha} 00:00:00`, `${fecha} 23:59:59`]
-          // }
+
         },
-        // replacements: { currentDate },
-        // order: [["fechaHora", "DESC"]]
       });
       res.status(200).json(solicitudAyuda);
     } catch (error) {

@@ -19,3 +19,4 @@ export const COGNITO_POOL_ID: string = process.env.COGNITO_POOL_ID || "";
 export const COGNITO_CLIENT_ID: string = process.env.COGNITO_CLIENT_ID || "";
 export const COGNITO_SECRET_CLIENT: string =
   process.env.COGNITO_SECRET_CLIENT || "";
+export const AWS_INSTANCE: string = process.env.AWS_INSTANCE || ""
