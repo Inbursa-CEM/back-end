@@ -119,47 +119,44 @@ class LlamadaController extends AbstractController {
     );
   }
 
-  private async postInicioLlamada(req: Request, res: Response) {
+  private async postInicioLlamada(req: Request, res: Response){
     try {
-      //Crear una nueva llamada en la bd
-      const newLlamada = await db.Llamada.create({
-        fechaInicio: new Date(),
-        fechaFin: null,
-        problemaResuelto: null,
-        idUsuario: req.body.idUsuario,
-        idTransaccion: req.body.idTransaccion,
-        nivelSatisfaccion: 4,
-        sentimiento: "NEUTRAL",
-        tema: "Problema con una transacción",
-        motivo: "Quejas y reclamaciones",
-        urlTranscripcion: null,
-        contactId: req.body.contactId,
-      });
-      console.log("Llamada inicializado registrada");
-      res.status(200).json(newLlamada);
-    } catch (error) {
-      console.log("Error en Llamada Controller:", error);
-      res.status(500).json({ error: "Error al NotificacionController" });
+        const newLlamada = await db.Llamada.create({
+            fechaInicio: new Date(),
+            fechaFin: null,
+            problemaResuelto: null,
+            idUsuario: req.body.idUsuario,
+            idTransaccion: req.body.idTransaccion,
+            sentimiento: "NEUTRAL",
+            nivelSatisfaccion: 4,
+            tema: "Problema con una transacción",
+            motivo: "Quejas y reclamaciones",
+            urlTranscripcion: null,
+            contactId: req.body.contactId
+        });
+        console.log("Llamada inicializado registrada")
+        res.status(200).json(newLlamada);
+    } catch(error) {
+        console.log("Error en Llamada Controller:", error);
+        res.status(500).json({error:"Error al NotificacionController"});
     }
-  }
-
-  private async postFinLlamada(req: Request, res: Response) {
-    try {
-      //Actualizar la llamada para registrar su fin
+}
+  private async postFinLlamada(req: Request, res: Response){
+    try{
       const contactId = req.body.contactId;
-      const newLlamada = await db.Llamada.update(
-        {
-          fechaFin: new Date(),
-          sentimiento: req.body.sentimiento,
-        },
-        //Se busca con ayuda del contact id
-        { where: { contactId } }
-      );
+      
+      const newLlamada = await db.Llamada.update({
+        fechaFin: new Date(),
+        sentimiento: req.body.sentimiento, 
+      },
+        {where: {contactId}}
+      ); 
 
       res.status(200).json(newLlamada);
       console.log("Llamada actualizada correctamente en la base de datos");
-    } catch (error) {
-      res.status(500).json({ error: "Error en Llamada Controller" });
+    }
+    catch(error){
+      res.status(500).json({error: "Error en Llamada Controller"})
     }
   }
 
