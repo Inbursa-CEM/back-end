@@ -110,7 +110,7 @@ class NotificacionController extends AbstractController {
   // Controller que obtiene las notificaciones incompletas de un usuario o todas las notificaciones
   private async getObtenerNotificaciones(req: Request, res: Response) {
     try {
-      const idUsuario = req.query.idUsuario;
+      const idUsuario = req.params.idUsuario;
       const whereClause = idUsuario
         ? { idUsuario: idUsuario, completada: false }
         : { completada: false };

@@ -123,7 +123,7 @@ class LlamadaController extends AbstractController {
     try {
       //Crear una nueva llamada en la bd
       const newLlamada = await db.Llamada.create({
-        fechaInicio: new Date().toLocaleDateString("es-MX"),
+        fechaInicio: new Date(),
         fechaFin: null,
         problemaResuelto: null,
         idUsuario: req.body.idUsuario,
@@ -149,7 +149,7 @@ class LlamadaController extends AbstractController {
       const contactId = req.body.contactId;
       const newLlamada = await db.Llamada.update(
         {
-          fechaFin: new Date().toLocaleDateString("es-MX"),
+          fechaFin: new Date(),
           sentimiento: req.body.sentimiento,
         },
         //Se busca con ayuda del contact id
@@ -322,7 +322,7 @@ class LlamadaController extends AbstractController {
   private async getProblemasResueltos(req: Request, res: Response) {
     try {
         const idAgente = req.query.idUsuario;
-        const fechaActual = new Date().toLocaleDateString("es-MX"); // Obtener la fecha actual en formato es-MX
+        const fechaActual = new Date() // Obtener la fecha actual en formato es-MX
 
         // Construir las fechas de inicio y fin del día
         const fechaInicio = `${fechaActual} 00:00:00`;
@@ -375,7 +375,7 @@ class LlamadaController extends AbstractController {
   private async getNumLlamadas(req: Request, res: Response) {
     try {
       const idAgente = req.query.idUsuario;
-      const fechaActual = new Date().toLocaleDateString("es-MX"); // Obtener la fecha actual en formato es-MX
+      const fechaActual = new Date(); // Obtener la fecha actual en formato es-MX
 
       // Construir las fechas de inicio y fin del día
       const fechaInicio = `${fechaActual} 00:00:00`;
@@ -482,7 +482,7 @@ class LlamadaController extends AbstractController {
   //llamada/promedioDuracion?idUsuario=2
   private async getPromedioDuracion(req: Request, res: Response) {
     const usuario = req.query.idUsuario;
-    const fechaActual = new Date().toLocaleDateString("es-MX"); // Obtener la fecha actual en formato es-MX
+    const fechaActual = new Date(); // Obtener la fecha actual en formato es-MX
 
     // Construir las fechas de inicio y fin del día
     const fechaInicio = `${fechaActual} 00:00:00`;
