@@ -32,6 +32,13 @@ class AuthenticationController extends AbstractController {
   private async signin(req: Request, res: Response) {
     const { email, password } = req.body;
     try {
+      try {
+        await this.cognitoService.signInUser(email, password);
+      }
+      catch (error: any) {
+        res.status(404).send("Usuario o contraseña incorrecta");
+        return;
+      }
       const login = await this.cognitoService.signInUser(email, password);
       const usuario = await db.Usuario.findOne({
         attributes: ["idUsuario", "nombre", "rol", "urlFoto"],
@@ -39,10 +46,6 @@ class AuthenticationController extends AbstractController {
           correo: email,
         },
       });
-      if (!usuario || !login.AuthenticationResult) {
-        res.status(404).send("El usuario no existe");
-        return;
-      }
       res.status(200).send({
         ...login.AuthenticationResult,
         usuario,
@@ -108,11 +111,7 @@ class AuthenticationController extends AbstractController {
   private async changepassword(req: Request, res: Response) {
     const { email, code, password } = req.body;
     try {
-      const user = await this.cognitoService.changePassword(
-        email,
-        code,
-        password
-      );
+      await this.cognitoService.changePassword(email, code, password);
       res.status(200).send({ message: "Password changed" });
     } catch (error: any) {
       res.status(500).send({ code: error.code, message: error.message }).end();
