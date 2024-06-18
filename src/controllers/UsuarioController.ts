@@ -20,17 +20,34 @@ class UsuarioController extends AbstractController {
     this.router.get("/supervisores", this.getSupervisores.bind(this));
     this.router.get(
       "/infoActualAgentes",
-      // this.authMiddleware.verifyToken,
+      this.authMiddleware.verifyToken,
       this.getInfoActualAgentes.bind(this)
     );
     this.router.get(
       "/agentesDeSupervisor",
+      this.authMiddleware.verifyToken,
       this.getAgentesBySupervisor.bind(this)
     );
-    this.router.get("/especifico", this.getSpecificAgent.bind(this));
-    this.router.get("/estatusAgente", this.getEstatusAgente.bind(this));
-    this.router.get("/meta", this.getMetaBySupervisor.bind(this));
-    this.router.get("/meta/actualizar", this.updateMetaBySupervisor.bind(this));
+    this.router.get(
+      "/especifico",
+      this.authMiddleware.verifyToken,
+      this.getSpecificAgent.bind(this)
+    );
+    this.router.get(
+      "/estatusAgente",
+      this.authMiddleware.verifyToken,
+      this.getEstatusAgente.bind(this)
+    );
+    this.router.get(
+      "/meta",
+      this.authMiddleware.verifyToken,
+      this.getMetaBySupervisor.bind(this)
+    );
+    this.router.get(
+      "/meta/actualizar",
+      this.authMiddleware.verifyToken,
+      this.updateMetaBySupervisor.bind(this)
+    );
   }
 
   // Método para obtener la lista de supervisores en la base de datos
@@ -159,7 +176,8 @@ class UsuarioController extends AbstractController {
         // Si el agente tiene una llamada activa, obtiene los datos de la llamada
         if (agente.Llamada.length > 0) {
           duracion = agente.getDataValue("duracionLlamada");
-          nombreCliente = agente.Llamada[0].Transaccion.Tarjeta.Cuenta.Cliente.nombre;
+          nombreCliente =
+            agente.Llamada[0].Transaccion.Tarjeta.Cuenta.Cliente.nombre;
           saldoCliente = agente.Llamada[0].Transaccion.Tarjeta.saldo;
           contactId = agente.Llamada[0].contactId;
         }
