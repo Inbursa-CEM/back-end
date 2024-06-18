@@ -1,0 +1,106 @@
+import { Model } from "sequelize";
+
+interface UsuarioAttributes {
+  idUsuario: number;
+  nombre: string;
+  telefono: number;
+  correo: string;
+  idSupervisor: number;
+  departamento: string;
+  urlFoto: string;
+  rol: string;
+  meta: number;
+}
+
+module.exports = (sequelize: any, DataTypes: any) => {
+  class Usuario extends Model<UsuarioAttributes> implements UsuarioAttributes {
+    public idUsuario!: number;
+    public nombre!: string;
+    public telefono!: number;
+    public correo!: string;
+    public idSupervisor!: number;
+    public departamento!: string;
+    public urlFoto!: string;
+    public rol!: string;
+    public meta!: number;
+
+    static associate(models: any) {
+      Usuario.hasMany(models.Llamada, {
+        foreignKey: "idUsuario",
+        sourceKey: "idUsuario",
+        as: "Llamada",
+      });
+      Usuario.hasMany(models.Notificacion, {
+        foreignKey: "idUsuario",
+        sourceKey: "idUsuario",
+        as: "Notificacion",
+      });
+      Usuario.belongsToMany(models.AreaOportunidad, {
+        through: "UsuarioArea",
+        foreignKey: "idUsuario",
+        otherKey: "idArea",
+      });
+      Usuario.belongsToMany(models.Curso, {
+        through: models.UsuarioCurso,
+        foreignKey: "idUsuario",
+        otherKey: "idCurso",
+      });
+      Usuario.belongsToMany(models.Recomendacion, {
+        through: "UsuarioRecomendacion",
+        foreignKey: "idUsuario",
+        otherKey: "idRecomendacion",
+      });
+    }
+  }
+  Usuario.init(
+    {
+      idUsuario: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false,
+      },
+      nombre: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      telefono: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      correo: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      idSupervisor: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: "Usuario",
+          key: "idUsuario",
+        },
+      },
+      departamento: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      urlFoto: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      rol: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      meta: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+    },
+    {
+      sequelize,
+      modelName: "Usuario",
+    }
+  );
+  return Usuario;
+};
