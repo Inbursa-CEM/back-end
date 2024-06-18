@@ -119,47 +119,44 @@ class LlamadaController extends AbstractController {
     );
   }
 
-  private async postInicioLlamada(req: Request, res: Response) {
+  private async postInicioLlamada(req: Request, res: Response){
     try {
-      //Crear una nueva llamada en la bd
-      const newLlamada = await db.Llamada.create({
-        fechaInicio: new Date(),
-        fechaFin: null,
-        problemaResuelto: null,
-        idUsuario: req.body.idUsuario,
-        idTransaccion: req.body.idTransaccion,
-        nivelSatisfaccion: 4,
-        sentimiento: "NEUTRAL",
-        tema: "Problema con una transacción",
-        motivo: "Quejas y reclamaciones",
-        urlTranscripcion: null,
-        contactId: req.body.contactId,
-      });
-      console.log("Llamada inicializado registrada");
-      res.status(200).json(newLlamada);
-    } catch (error) {
-      console.log("Error en Llamada Controller:", error);
-      res.status(500).json({ error: "Error al NotificacionController" });
+        const newLlamada = await db.Llamada.create({
+            fechaInicio: new Date(),
+            fechaFin: null,
+            problemaResuelto: null,
+            idUsuario: req.body.idUsuario,
+            idTransaccion: req.body.idTransaccion,
+            sentimiento: "NEUTRAL",
+            nivelSatisfaccion: 4,
+            tema: "Problema con una transacción",
+            motivo: "Quejas y reclamaciones",
+            urlTranscripcion: null,
+            contactId: req.body.contactId
+        });
+        console.log("Llamada inicializado registrada")
+        res.status(200).json(newLlamada);
+    } catch(error) {
+        console.log("Error en Llamada Controller:", error);
+        res.status(500).json({error:"Error al NotificacionController"});
     }
-  }
-
-  private async postFinLlamada(req: Request, res: Response) {
-    try {
-      //Actualizar la llamada para registrar su fin
+}
+  private async postFinLlamada(req: Request, res: Response){
+    try{
       const contactId = req.body.contactId;
-      const newLlamada = await db.Llamada.update(
-        {
-          fechaFin: new Date(),
-          sentimiento: req.body.sentimiento,
-        },
-        //Se busca con ayuda del contact id
-        { where: { contactId } }
-      );
+      
+      const newLlamada = await db.Llamada.update({
+        fechaFin: new Date(),
+        sentimiento: req.body.sentimiento, 
+      },
+        {where: {contactId}}
+      ); 
 
       res.status(200).json(newLlamada);
       console.log("Llamada actualizada correctamente en la base de datos");
-    } catch (error) {
-      res.status(500).json({ error: "Error en Llamada Controller" });
+    }
+    catch(error){
+      res.status(500).json({error: "Error en Llamada Controller"})
     }
   }
 
@@ -318,85 +315,6 @@ class LlamadaController extends AbstractController {
     );
   }
 
-  //llamada/problemasResueltos?idUsuario=2
-  private async getProblemasResueltos(req: Request, res: Response) {
-    try {
-        const idAgente = req.query.idUsuario;
-        const fechaActual = new Date() // Obtener la fecha actual en formato es-MX
-
-        // Construir las fechas de inicio y fin del día
-        const fechaInicio = `${fechaActual} 00:00:00`;
-        const fechaFin = `${fechaActual} 23:59:59`;
-
-        // Se obtienen el número de problemas resueltos de la llamada por el id de Agente y la fecha actual
-        const queryCompleta = await db["Llamada"].findAll({
-            where: {
-                idUsuario: idAgente,
-                fechaInicio: {
-                    [db.Sequelize.Op.between]: [fechaInicio, fechaFin],
-                },
-            },
-            attributes: [
-                [
-                    db.sequelize.fn(
-                        "SUM",
-                        db.sequelize.literal(
-                            "CASE WHEN problemaResuelto = 0 THEN 1 ELSE 0 END"
-                        )
-                    ),
-                    "problemaNoResuelto",
-                ],
-                [
-                    db.sequelize.fn(
-                        "SUM",
-                        db.sequelize.literal(
-                            "CASE WHEN problemaResuelto = 1 THEN 1 ELSE 0 END"
-                        )
-                    ),
-                    "problemaResuelto",
-                ],
-            ],
-        });
-
-        // Se hace el cálculo de las llamadas que sí resolvieron el problema y las que no
-        const resultado = {
-            problemaResuelto: queryCompleta[0].get("problemaResuelto"),
-            problemaNoResuelto: queryCompleta[0].get("problemaNoResuelto"),
-            fecha: fechaActual, // Mantener la fecha actual en el resultado
-        };
-        res.status(200).json(resultado);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send("Error en Llamada Controller");
-    }
-  }
-
-  //llamada/numLlamadas?idUsuario=2
-  private async getNumLlamadas(req: Request, res: Response) {
-    try {
-      const idAgente = req.query.idUsuario;
-      const fechaActual = new Date(); // Obtener la fecha actual en formato es-MX
-
-      // Construir las fechas de inicio y fin del día
-      const fechaInicio = `${fechaActual} 00:00:00`;
-      const fechaFin = `${fechaActual} 23:59:59`;
-
-      const numLlamadas = await db["Llamada"].count({
-        where: {
-          idUsuario: idAgente,
-          fechaInicio: {
-            [db.Sequelize.Op.between]: [fechaInicio, fechaFin],
-        },
-        },
-      });
-
-      res.status(200).json({ numLlamadas: numLlamadas, fecha: fechaActual });
-    } catch (error) {
-      console.log(error);
-      res.status(500).send("Error en Llamada Controller");
-    }
-  }
-
   private async getNumLlamadasCliente(req: Request, res: Response) {
     try {
       const telefono = req.params.telefono;
@@ -479,14 +397,37 @@ class LlamadaController extends AbstractController {
     }
   }
 
+   //llamada/numLlamadas?idUsuario=2
+   private async getNumLlamadas(req: Request, res: Response) {
+    try {
+      const idAgente = req.query.idUsuario;
+      const fechaActual = await db.sequelize.query("SELECT CURRENT_DATE AS fecha_actual", { type: db.sequelize.QueryTypes.SELECT });
+      const fecha = fechaActual[0].fecha_actual;
+
+      const numLlamadas = await db["Llamada"].count({
+        where: {
+          idUsuario: idAgente,
+          fechaInicio: {
+            [db.Sequelize.Op.between]: [`${fecha} 00:00:00`, `${fecha} 23:59:59`]
+          }
+        }
+      });
+
+      res.status(200).json({ "numLlamadas": numLlamadas, "fecha": fecha });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error en Llamada Controller");
+    }
+  }
+
   //llamada/promedioDuracion?idUsuario=2
   private async getPromedioDuracion(req: Request, res: Response) {
     const usuario = req.query.idUsuario;
-    const fechaActual = new Date(); // Obtener la fecha actual en formato es-MX
-
-    // Construir las fechas de inicio y fin del día
-    const fechaInicio = `${fechaActual} 00:00:00`;
-    const fechaFin = `${fechaActual} 23:59:59`;
+    const fechaActual = await db.sequelize.query(
+      "SELECT CURRENT_DATE AS fecha_actual",
+      { type: db.sequelize.QueryTypes.SELECT }
+    );
+    const fecha = fechaActual[0].fecha_actual;
 
     try {
       const duraciones = await db["Llamada"].findAll({
@@ -497,8 +438,11 @@ class LlamadaController extends AbstractController {
         where: {
           idUsuario: usuario,
           fechaInicio: {
-            [db.Sequelize.Op.between]: [fechaInicio, fechaFin],
-        },
+            [db.Sequelize.Op.between]: [
+              `${fecha} 00:00:00`,
+              `${fecha} 23:59:59`,
+            ],
+          },
         },
       });
 
@@ -526,7 +470,61 @@ class LlamadaController extends AbstractController {
 
       res
         .status(200)
-        .json({ promedioDuracion: promedioDuracion, fecha: fechaActual });
+        .json({ promedioDuracion: promedioDuracion, fecha: fecha });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send("Error en Llamada Controller");
+    }
+  }
+
+  //llamada/problemasResueltos?idUsuario=2
+  private async getProblemasResueltos(req: Request, res: Response) {
+    try {
+      const idAgente = req.query.idUsuario;
+      const fechaActual = await db.sequelize.query(
+        "SELECT CURRENT_DATE AS fecha_actual",
+        { type: db.sequelize.QueryTypes.SELECT }
+      );
+      const fecha = fechaActual[0].fecha_actual;
+
+      const queryCompleta = await db["Llamada"].findAll({
+        where: {
+          idUsuario: idAgente,
+          fechaInicio: {
+            [db.Sequelize.Op.between]: [
+              `${fecha} 00:00:00`,
+              `${fecha} 23:59:59`,
+            ],
+          },
+        },
+        attributes: [
+          [
+            db.sequelize.fn(
+              "SUM",
+              db.sequelize.literal(
+                "CASE WHEN problemaResuelto = 0 THEN 1 ELSE 0 END"
+              )
+            ),
+            "problemaNoResuelto",
+          ],
+          [
+            db.sequelize.fn(
+              "SUM",
+              db.sequelize.literal(
+                "CASE WHEN problemaResuelto = 1 THEN 1 ELSE 0 END"
+              )
+            ),
+            "problemaResuelto",
+          ],
+        ],
+      });
+
+      const resultado = {
+        problemaResuelto: queryCompleta[0].get("problemaResuelto"),
+        problemaNoResuelto: queryCompleta[0].get("problemaNoResuelto"),
+        fecha: fecha,
+      };
+      res.status(200).json(resultado);
     } catch (error) {
       console.log(error);
       res.status(500).send("Error en Llamada Controller");
